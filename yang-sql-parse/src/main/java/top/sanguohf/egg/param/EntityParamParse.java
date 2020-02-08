@@ -7,6 +7,7 @@ import top.sanguohf.egg.ops.EntityInsertSql;
 import top.sanguohf.egg.ops.EntitySelectSql;
 import top.sanguohf.egg.ops.EntityUpdateSql;
 import top.sanguohf.egg.reflect.ReflectEntity;
+import top.sanguohf.egg.util.EntityParseUtil;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +30,9 @@ public class EntityParamParse {
         //1.构造实体条件
         JSONObject condition= params.getCondition();
         if(condition !=null){
+            JSONObject selectCondition = EntityParseUtil.saveConditionToSelectCondition(condition);
+            if(selectCondition!=null)
+                condition=selectCondition;
             EntityCondition condition1 = parserParamCondition(condition);
             //System.out.println(condition1.toSql());
             selectSql.setWheres(condition1);

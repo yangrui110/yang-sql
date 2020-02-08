@@ -49,6 +49,8 @@ public class TestOne {
         con1.put("id","1001");
         params.setCondition(con1);
         commonService.update(params);
+        List list = commonService.findList(params);
+        System.out.println(list);
     }
 
 }

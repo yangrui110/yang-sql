@@ -52,17 +52,23 @@ public class EntityParseUtil {
      * 更新条件转换成选择条件
      * */
     public static JSONObject saveConditionToSelectCondition(Map saveCondition){
-        LinkedList list = new LinkedList<>();
-        for(Object key:saveCondition.entrySet()){
-            Map hashMap = new HashMap<>();
-            hashMap.put("left",key);
-            hashMap.put("right",saveCondition.get(key));
-            hashMap.put("relation","=");
-            list.add(hashMap);
+        Object con = saveCondition.get("condition");
+        Object left = saveCondition.get("left");
+        Object right = saveCondition.get("right");
+        if(con==null||(left==null&&right==null)) {
+            LinkedList list = new LinkedList<>();
+            for (Object key : saveCondition.keySet()) {
+                Map hashMap = new HashMap<>();
+                hashMap.put("left", key);
+                hashMap.put("right", saveCondition.get(key));
+                hashMap.put("relation", "=");
+                list.add(hashMap);
+            }
+            JSONObject result = new JSONObject();
+            result.put("condition", list);
+            result.put("combine", "and");
+            return result;
         }
-        JSONObject result = new JSONObject();
-        result.put("condition",list);
-        result.put("combine","and");
-        return result;
+        return null;
     }
 }
