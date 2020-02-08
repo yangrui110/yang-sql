@@ -109,7 +109,7 @@ public class EntityParamParse {
         // TODO: implement
         //此种情况，主要是解析data的值
         EntityInsertSql insertSql=new EntityInsertSql();
-        JSONObject os = params.getData();
+        JSONObject os = params.getCondition();
         List<EntityInsert> inserts = new LinkedList<>();
         for(String k:os.keySet()){
             EntityInsert insert = new EntityInsert();
@@ -127,7 +127,7 @@ public class EntityParamParse {
     public EntityUpdateSql parseToEntityUpdateSql() throws NoSuchFieldException, ClassNotFoundException {
         // TODO: implement
         EntityUpdateSql updateSql = new EntityUpdateSql();
-        JSONObject os = params.getData();
+        JSONObject os = params.getCondition();
         List<EntityInsert> inserts = new LinkedList<>();
         for(String k:os.keySet()){
             EntityInsert insert = new EntityInsert();
@@ -137,12 +137,7 @@ public class EntityParamParse {
         }
         updateSql.setTableName(ReflectEntity.reflectTableName(classEntity));
         updateSql.setUpdates(inserts);
-        JSONObject condition= params.getCondition();
-        if(condition !=null){
-            EntityCondition condition1 = parserParamCondition(condition);
-            //System.out.println(condition1.toSql());
-            updateSql.setWheres(condition1);
-        }
+        updateSql.setWheres(ReflectEntity.reflectPrimaryKeys(classEntity,os));
         System.out.println(updateSql.toSql());
         return updateSql;
     }
@@ -152,10 +147,7 @@ public class EntityParamParse {
         EntityDeleteSql deleteSql=new EntityDeleteSql();
         deleteSql.setTableName(ReflectEntity.reflectTableName(classEntity));
         JSONObject condition= params.getCondition();
-        if(condition !=null){
-            EntityCondition condition1 = parserParamCondition(condition);
-            deleteSql.setWheres(condition1);
-        }
+        deleteSql.setWheres(ReflectEntity.reflectPrimaryKeys(classEntity,condition));
         System.out.println(deleteSql.toSql());
         return deleteSql;
     }

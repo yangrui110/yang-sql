@@ -13,7 +13,7 @@ import java.util.List;
 
 public class MainTest {
 
-    public static void main(String[] args) throws ClassNotFoundException, NoSuchFieldException {
+    public static void main1(String[] args) throws ClassNotFoundException, NoSuchFieldException {
         EntityParams params=new EntityParams();
         JSONObject os=new JSONObject();
         os.put("left","userName");
@@ -56,7 +56,7 @@ public class MainTest {
         l1.put("right",com2);
         l1.put("relation","and");
         params.setCondition(l1);
-        params.setTableClassName("com.yang.sql.reflect.User");
+        params.setTableClassName("top.sanguohf.egg.reflect.User");
         EntityOrderBy orderBy1=new EntityOrderBy();
         orderBy1.setColumn("userName");
         orderBy1.setDirect("desc");
@@ -67,7 +67,7 @@ public class MainTest {
         JSONObject os0=new JSONObject();
         os0.put("userName","admin1");
         os0.put("password","11122");
-        params.setData(os0);
+        //params.setData(os0);
         EntitySelectSql selectSql=new EntityParamParse(params).parseToEntitySelectSql();
         System.out.println(new EntityPageSql(selectSql).toPageSql(1,10, DbType.ORACLE));
         System.out.println(new EntityPageSql(selectSql).toCountSql(DbType.SQL));
@@ -75,13 +75,16 @@ public class MainTest {
         //System.out.println(entity.reflectSelectColumns(User.class));
     }
 
-    public static void main2(String[] args) throws ClassNotFoundException, NoSuchFieldException {
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchFieldException {
         JSONObject os=new JSONObject();
         os.put("userName","admin1");
         os.put("password","11122");
+        os.put("id","99");
         EntityParams params=new EntityParams();
-        params.setTableClassName("com.yang.sql.reflect.User");
-        params.setData(os);
+        params.setTableClassName("top.sanguohf.egg.reflect.User");
+        params.setCondition(os);
         new EntityParamParse(params).parseToEntityInertSql();
+        new EntityParamParse(params).parseToEntityUpdateSql();
+        new EntityParamParse(params).parseToEntityDeleteSql();
     }
 }

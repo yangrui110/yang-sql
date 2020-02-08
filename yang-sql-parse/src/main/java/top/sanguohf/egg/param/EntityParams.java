@@ -38,5 +38,4 @@ public class EntityParams {
      * */
     private JSONObject condition;
     private List<EntityOrderBy> orderBy;
-    private JSONObject data;
 }
