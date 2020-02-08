@@ -29,12 +29,11 @@ public class EntityParamParse {
         EntitySelectSql selectSql = new EntitySelectSql();
         //1.构造实体条件
         JSONObject condition= params.getCondition();
-        if(condition !=null){
+        if(condition !=null&&condition.keySet().size()>0){
             JSONObject selectCondition = EntityParseUtil.saveConditionToSelectCondition(condition);
             if(selectCondition!=null)
                 condition=selectCondition;
             EntityCondition condition1 = parserParamCondition(condition);
-            //System.out.println(condition1.toSql());
             selectSql.setWheres(condition1);
         }
         //2.确定查询的数据库表

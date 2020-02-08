@@ -27,9 +27,9 @@ public class TestOne {
         params.setTableClassName("UserOne");
         //设置查询条件
         JSONObject con1 = new JSONObject();
-        con1.put("left","userName");
-        con1.put("right","%admin%");
-        con1.put("relation","like");
+        //con1.put("left","userName");
+        //con1.put("right","%admin%");
+        //con1.put("relation","like");
         params.setCondition(con1);
         List list = commonService.findList(params);
         System.out.println(list);
@@ -45,8 +45,8 @@ public class TestOne {
         EntityParams params = new EntityParams();
         params.setTableClassName("UserOne");
         JSONObject con1 = new JSONObject();
-        con1.put("userName","哈哈哈哈");
-        con1.put("id","1001");
+        //con1.put("userName","哈哈哈哈");
+        //con1.put("id","1001");
         params.setCondition(con1);
         commonService.update(params);
         List list = commonService.findList(params);
