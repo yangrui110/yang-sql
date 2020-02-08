@@ -9,9 +9,9 @@
 </dependency>
 ```
 ### 2. 使用
-1. 配置数据源（Datasource）
+1. 配置数据源（`Datasource`）
 2. 使用注解`@ScanEntity({"待扫描的实体类路径"})`
-3. 注入`CommonService`实现通用的增删改查以及批量增删该
+3. 注入`CommonService`实现通用的增删改查以及批量增删改
 
 ### 3. 参数说明
 1. 传入的参数`EntityParams`，是从前端传递而来的参数，需要被后端解析成SQL语句，其参数样式.具体的`EntityParams`的参数详解
