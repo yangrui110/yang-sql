@@ -111,3 +111,14 @@ public class TestOne {
 
 }
 ```
+    以及主类上的注解
+```java
+@EnableTransactionManagement //保证批量操作的事务一致性
+@ScanEntity("top.sanguohf.egg.test.entity")
+@SpringBootApplication
+public class YangSqlTest {
+    public static void main(String[] args) {
+        SpringApplication.run(YangSqlTest.class);
+    }
+}
+```
