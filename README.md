@@ -51,7 +51,7 @@ private JSONObject data;
        "condition": [
            {"left": "userName","relation": "like","right": "%admin%"},
            {"left": "password","relation": "=","right": "6547199"}
-       ]
+       ],"combine": "and"
   }
 }
 ```  
