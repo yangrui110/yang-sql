@@ -12,6 +12,7 @@
     <modules>
         <module>yang-sql-boot-configure</module>
         <module>yang-sql-parse</module>
+        <module>yang-sql-starter</module>
     </modules>
 
 </project>
