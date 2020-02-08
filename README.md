@@ -23,13 +23,11 @@ private String tableClassName;
 private JSONObject condition;
 //定义排序字段以及排序方式
 private List<EntityOrderBy> orderBy;
-//在调用保存或者更新时会使用该字段，存储更新的数据
-private JSONObject data;
 ```
 - `tableClassName` 类名  
         例如在`top.sanguohf.egg.test.entity.UserOne`路径下有`UserOne`类，此时`top.sanguohf.egg.test.entity`包被`@ScanEntity`配置
         ，所以只需要把`tableClassName`的值置为`UserOne`
-- `condition` 查询条件
+- `condition` 查询条件、更新的数据、插入的数据
 ```json
 {
   "left":"userName",
@@ -65,6 +63,14 @@ private JSONObject data;
    "combine": "and"
 }
 ```  
+    若是更新数据或者插入数据，则需要的数据格式为
+```json
+{
+  "userName": "张三",
+  "password": "王五",
+  "id": "10001"
+}
+```
     其它更复杂的条件，也可以参照以上逻辑  
 - `orderBy`排序字段  
 ````json
@@ -73,14 +79,6 @@ private JSONObject data;
   {"column": "password","direct": "asc"}
 ]
 ````
-- `data`更新/插入的数据
-```json
-{
-  "userName": "张三",
-  "password": "45677",
-  "id": "812738239"
-}
-```
 2、分页查询，在查询的基础上多了一个分页参数，调用逻辑都是一样  
 3、测试代码
 ```java
@@ -123,3 +121,11 @@ public class YangSqlTest {
     }
 }
 ```
+4、实体类的注解详解  
+`@TableName()` 作用在类上，用于定义这个实体类对应的数据库表名称  
+`@Id`作用在属性上，用户标识此属性为主键  
+`@IgnoreSelectReback`作用在属性上，用户在查询数据时，不返回此字段  
+`@Field`作用在属性上，用户定义列对应的数据库字段的名字  
+
+5、通用的增删改查类`CommonService`  
+使用方式，通过`@Autowire`注入，然后根据注入的对象操作方法。
