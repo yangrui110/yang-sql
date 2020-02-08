@@ -32,7 +32,7 @@ private JSONObject data;
 ```json
 {
   "left":"userName",
-   "relation":"=",,
+   "relation":"=",
    "right": "admin"
 }
 ```  
@@ -80,7 +80,7 @@ private JSONObject data;
   "id": "812738239"
 }
 ```
-2、分页查询，在查询的基础上多了一个分页参数，调用逻辑都是一样高  
+2、分页查询，在查询的基础上多了一个分页参数，调用逻辑都是一样  
 3、测试代码
 ```java
 @RunWith(SpringRunner.class)
