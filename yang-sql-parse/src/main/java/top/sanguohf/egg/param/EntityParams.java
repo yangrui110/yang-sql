@@ -10,8 +10,6 @@ import java.util.List;
 public class EntityParams {
     private String tableClassName;
 
-    //需要被优先赋值的属性
-    private Class tableClass;
     /**
      * 传递的格式：
      *  {
