@@ -44,7 +44,7 @@ public class EntityPageSql {
     public String toCountSql() {
         // TODO: implement
         StringBuilder builder = new StringBuilder();
-        builder.append("select count(1) as total");
+        builder.append("select count(1) as __total__");
         makeOtherCommon(builder);
         return builder.toString();
     }

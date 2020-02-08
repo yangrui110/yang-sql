@@ -66,7 +66,7 @@ public class CommonServiceImpl implements CommonService {
         String countSql = new EntityPageSql(selectSql).toCountSql(dbType.getDbType());
         Map<String,Object> counts = jdbcTemplate.queryForMap(countSql);
         System.out.println("查询语句:"+countSql);
-        long count=Long.parseLong(""+counts.get("total"));
+        long count=Long.parseLong(""+counts.get("__total__"));
         return count;
     }
 
