@@ -25,8 +25,17 @@ public class EntityParamParse {
         classEntity = Class.forName(entityParams.getTableClassName());
     }
 
+    //解析实体或者是视图，返回selecSql
+    private EntitySelectSql explainEntity(Class entity){
+        EntitySelectSql selectSql = new EntitySelectSql();
+        //检测是否存在三个注解
+        return selectSql;
+    }
+
     public EntitySelectSql parseToEntitySelectSql() throws ClassNotFoundException, NoSuchFieldException {
         EntitySelectSql selectSql = new EntitySelectSql();
+        //---1.首先，解析实体或者是视图，作为selecSql
+        //---2.解析params的相关数据
         //1.构造实体条件
         JSONObject condition= params.getCondition();
         if(condition !=null&&condition.keySet().size()>0){
