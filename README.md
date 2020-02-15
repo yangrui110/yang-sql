@@ -7,7 +7,7 @@
 <dependency>
     <groupId>top.sanguohf.egg</groupId>
     <artifactId>yang-sql-starter</artifactId>
-    <version>1.0-release</version>
+    <version>1.0.4-release</version>
 </dependency>
 ```
 ### 2. 使用
@@ -20,7 +20,7 @@
 ```java
 //定义实体的类名，比如User类，其值为User
 private String tableClassName;
-//定义查询的条件，格式如下
+//定义查询或更新的条件，格式如下
 private JSONObject condition;
 //定义排序字段以及排序方式
 private List<EntityOrderBy> orderBy;
