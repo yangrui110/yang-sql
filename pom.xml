@@ -6,7 +6,7 @@
 
     <groupId>top.sanguohf.egg</groupId>
     <artifactId>yang-sql-parent</artifactId>
-    <version>1.0-release</version>
+    <version>1.0.3-release</version>
     <packaging>pom</packaging>
     <name>yang-sql-parent</name>
     <description>父项目</description>

@@ -6,10 +6,11 @@
 
     <groupId>top.sanguohf.egg</groupId>
     <artifactId>yang-sql-starter</artifactId>
-    <version>1.0-release</version>
+    <version>1.0.5-release</version>
     <name>yang-sql-starter</name>
     <description>开启器</description>
     <url>https://github.com/yangrui110/yang-sql/yang-sql-starter</url>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -19,7 +20,7 @@
         <dependency>
             <groupId>top.sanguohf.egg</groupId>
             <artifactId>yang-sql-boot-configure</artifactId>
-            <version>1.0-release</version>
+            <version>1.0.5-release</version>
         </dependency>
     </dependencies>
 

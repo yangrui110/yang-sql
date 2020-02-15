@@ -3,14 +3,10 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>top.sanguohf.egg</groupId>
-        <artifactId>yang-sql-parent</artifactId>
-        <version>1.0-release</version>
-    </parent>
+
     <groupId>top.sanguohf.egg</groupId>
     <artifactId>yang-sql-boot-configure</artifactId>
-    <version>1.0-release</version>
+    <version>1.0.5-release</version>
     <name>yang-sql-boot-configure</name>
     <description>和SpringBoot配置</description>
     <url>https://github.com/yangrui110/yang-sql/yang-sql-boot-configure</url>
@@ -25,7 +21,7 @@
         <dependency>
             <groupId>top.sanguohf.egg</groupId>
             <artifactId>yang-sql-parse</artifactId>
-            <version>1.0-release</version>
+            <version>1.0.5-release</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

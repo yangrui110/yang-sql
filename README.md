@@ -8,7 +8,7 @@
 <dependency>
     <groupId>top.sanguohf.egg</groupId>
     <artifactId>yang-sql-starter</artifactId>
-    <version>1.0.4-release</version>
+    <version>1.0.5-release</version>
 </dependency>
 ```
 ### 2. 使用

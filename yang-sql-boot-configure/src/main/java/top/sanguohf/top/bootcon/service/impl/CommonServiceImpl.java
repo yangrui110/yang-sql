@@ -162,7 +162,7 @@ public class CommonServiceImpl implements CommonService {
             EntityParams entityParams = new EntityParams();
             BeanUtils.copyProperties(pl,entityParams);
             entityParams.setTableClassName(classPackage);
-            list.add(pl);
+            list.add(entityParams);
         }
         return list;
     }

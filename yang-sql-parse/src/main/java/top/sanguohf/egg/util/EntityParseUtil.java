@@ -55,7 +55,7 @@ public class EntityParseUtil {
         Object con = saveCondition.get("condition");
         Object left = saveCondition.get("left");
         Object right = saveCondition.get("right");
-        if(con==null||(left==null&&right==null)) {
+        if(con==null&&(left==null&&right==null)) {
             LinkedList list = new LinkedList<>();
             for (Object key : saveCondition.keySet()) {
                 Map hashMap = new HashMap<>();
