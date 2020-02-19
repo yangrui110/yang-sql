@@ -79,7 +79,7 @@ public class MainTest {
         //System.out.println(entity.reflectSelectColumns(User.class));
     }
 
-    public static void main(String[] args) throws ClassNotFoundException, NoSuchFieldException {
+    public static void maini(String[] args) throws ClassNotFoundException, NoSuchFieldException {
         JSONObject os=new JSONObject();
         os.put("classesId","pmmm");
         os.put("userName","yang");
@@ -122,9 +122,9 @@ public class MainTest {
         //System.out.println(forName.getName());
     }
 
-    public static void maink(String[] args) throws ClassNotFoundException, NoSuchFieldException {
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchFieldException {
         EntityParams entityParams = new EntityParams();
-        entityParams.setTableClassName("top.sanguohf.egg.reflect.User");
+        entityParams.setTableClassName("top.sanguohf.egg.reflect.UserClassesView");
         EntitySelectSql selectSql = new EntityParamParse(entityParams).parseToEntitySelectSql();
         System.out.println(selectSql.toSql());
     }

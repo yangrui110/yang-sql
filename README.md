@@ -170,4 +170,33 @@ public class UserClassesView {
     private Teacher teacher;
 
 }
+```  
+上面这个视图实体类，对应的SQL语句是：
+```mysql
+SELECT
+	userOne.teacherId,
+	userOne.teacherName,
+	userOne.userName,
+	userOne.id,
+	aliasClass.CLASSES_ID AS classesId,
+	aliasClass.NAME AS classesName,
+	teacher.TEACHER_NAME AS teacherName 
+FROM
+	(
+	SELECT
+		oneOs.TEACHER_ID AS teacherId,
+		oneOs.TEACHER_NAME AS teacherName,
+		op.user_name AS userName,
+		op.ID AS id 
+	FROM
+		TEACHER oneOs
+		INNER JOIN USER op ON oneOs.TEACHER_ID = op.ID 
+	) userOne
+	LEFT JOIN CLASSES aliasClass ON userOne.id = aliasClass.CLASSES_ID 
+	AND userOne.userName = aliasClass.
+	NAME LEFT JOIN TEACHER teacher ON userOne.id = teacher.TEACHER_ID 
+WHERE
+	( userOne.teacherId = '1' AND teacher.TEACHER_ID = '1' AND teacher.TEACHER_NAME = '8' ) 
+ORDER BY
+	teacher.TEACHER_ID DESC
 ```
