@@ -128,7 +128,46 @@ public class YangSqlTest {
 `@TableName()` 作用在类上，用于定义这个实体类对应的数据库表名称  
 `@Id`作用在属性上，用户标识此属性为主键，默认是名为ID的属性作为主键  
 `@IgnoreSelectReback`作用在属性上，用户在查询数据时，不返回此字段  
-`@Field`作用在属性上，用户定义列对应的数据库字段的名字  
+`@Field`作用在属性上，用户定义列对应的数据库字段的名字以及定义列的别名 
+ 
+*以下注解可以用在视图实体上也可用在普通的实体上*  
+`@Condition`作用在属性上，定义查询条件  
+`@OrderBy`作用在属性上，定义排序字段，默认倒序  
+
+*以下注解用在视图实体属性上*  
+`@Conditions`,作用在视图实体的属性上，是`@condition`注解的复数形式，可同时定义多个条件  
+`@OrderBys`作用在视图实体的属性上，可同时定义多个排序字段  
+`@ViewTable`作用在类上，标识当前类是视图实体类
+`@MainTable`作用在视图实体属性上，定义主表信息
+`@ReferTable`作用在视图实体属性上，定义关联表的信息
 
 5、通用的增删改查类`CommonService`  
 使用方式，通过`@Autowire`注入，然后根据注入的对象操作方法。
+
+6、视图实体的定义实例
+```java
+//视图实体类，只是定义不同，使用方法和普通的实体类无差别
+@ViewTable //标识当前类是视图实体类
+public class UserClassesView {
+
+    @Condition(column = "teacherId",value = "1") //定义查询条件
+    @MainTable(tableAlias = "userOne") //定义视图查询的主表信息（其也可是视图实体）
+    private TeacherView teacherView;
+    
+    //定义join查询的关系
+    @ReferTable(tableAlias = "aliasClass",relation = "left join",condition = "userOne.id = aliasClass.classesId and userOne.userName = aliasClass.name")
+    private Classes classes;
+
+    @OrderBys({
+            @OrderBy(column = "teacherId",direct = "desc")
+    })  //定义排序字段
+    @Conditions({
+            @Condition(column = "teacherId",value = "1"),
+            @Condition(column = "teacherName",value = "8")
+    })//定义多个查询条件
+    //定义join查询关系
+    @ReferTable(tableAlias = "teacher",relation = "left join",condition = "userOne.id = teacher.teacherId",includeColumns = {"teacherName"})
+    private Teacher teacher;
+
+}
+```
