@@ -1,14 +1,18 @@
 package top.sanguohf.egg.param;
 
 import com.alibaba.fastjson.JSONObject;
+import top.sanguohf.egg.annotation.MainTable;
+import top.sanguohf.egg.annotation.ReferTable;
+import top.sanguohf.egg.annotation.TableName;
+import top.sanguohf.egg.annotation.ViewTable;
 import top.sanguohf.egg.base.*;
-import top.sanguohf.egg.ops.EntityDeleteSql;
-import top.sanguohf.egg.ops.EntityInsertSql;
-import top.sanguohf.egg.ops.EntitySelectSql;
-import top.sanguohf.egg.ops.EntityUpdateSql;
+import top.sanguohf.egg.ops.*;
 import top.sanguohf.egg.reflect.ReflectEntity;
 import top.sanguohf.egg.util.EntityParseUtil;
+import top.sanguohf.egg.util.StringUtils;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -19,35 +23,99 @@ public class EntityParamParse {
 
     private Class classEntity;
 
+    private EntitySelectSql selectSql;
+
+    private boolean present =false;
+
     public EntityParamParse(EntityParams entityParams) throws ClassNotFoundException {
         this.params = entityParams;
         //获取到指定的class实体
         classEntity = Class.forName(entityParams.getTableClassName());
+        present = classEntity.isAnnotationPresent(ViewTable.class);
     }
 
-    //解析实体或者是视图，返回selecSql
-    private EntitySelectSql explainEntity(Class entity){
+    private EntityJoinTable parseViewEntityTable(Class entity) throws ClassNotFoundException, NoSuchFieldException {
         EntitySelectSql selectSql = new EntitySelectSql();
-        //检测是否存在三个注解
+        Field[] fields = entity.getDeclaredFields();
+        boolean present = entity.isAnnotationPresent(ViewTable.class);
+        if(present) {
+            //设置表别名
+            for (Field field : fields) {
+                Class<?> forName = Class.forName(field.getGenericType().getTypeName());
+                if (field.isAnnotationPresent(MainTable.class)) {
+                    //解析出主表
+                    MainTable fieldAnnotation = field.getAnnotation(MainTable.class);
+                    if (forName.isAnnotationPresent(ViewTable.class)) {
+                        EntityJoinTable entityJoinTable = parseViewEntityTable(forName);
+                        selectSql.setTabelName(entityJoinTable);
+                        selectSql.setTableAlias(fieldAnnotation.tableAlias());
+                    } else {
+                        EntitySimpleJoinTable joinTable = new EntitySimpleJoinTable();
+                        joinTable.setTableAlias(fieldAnnotation.tableAlias());
+                        if (forName.isAnnotationPresent(TableName.class))
+                            joinTable.setTableName(forName.getAnnotation(TableName.class).value());
+                        else joinTable.setTableName(StringUtils.camel2Underline(forName.getSimpleName()));
+                        //设置表名
+                        selectSql.setTabelName(joinTable);
+                    }
+                }
+            }
+        }else {
+            String tableName= ReflectEntity.reflectTableName(entity);
+            EntitySimpleJoinTable joinTable = new EntitySimpleJoinTable();
+            joinTable.setTableName(tableName);
+            selectSql.setTabelName(joinTable);
+        }
+        if(present) {
+            List<EntityColumn> viewTableColumns = ReflectEntity.getViewTableColumns(entity);
+            selectSql.getColumns().addAll(viewTableColumns);
+        }else {
+            List<EntityColumn> viewTableColumns = ReflectEntity.reflectSelectColumns(entity);
+            selectSql.getColumns().addAll(viewTableColumns);
+        }
+        //获取到关联条件
+        List<EntitySimpleJoin> relationJoins = ReflectEntity.getRelationJoins(entity);
+        selectSql.setJoins(relationJoins);
+        //设置条件
+        EntityCondition entityCondition = ReflectEntity.collectDefaultCondition(entity);
+        selectSql.setWheres(entityCondition);
+        //设置排序
+        List<EntityOrderBy> orderByList = ReflectEntity.collectDefaultOrderBy(entity);
+        selectSql.setOrderBys(orderByList);
         return selectSql;
     }
 
+
     public EntitySelectSql parseToEntitySelectSql() throws ClassNotFoundException, NoSuchFieldException {
-        EntitySelectSql selectSql = new EntitySelectSql();
-        //---1.首先，解析实体或者是视图，作为selecSql
-        //---2.解析params的相关数据
         //1.构造实体条件
+        selectSql = (EntitySelectSql) parseViewEntityTable(classEntity);
+
         JSONObject condition= params.getCondition();
+        EntityCondition entityCondition = ReflectEntity.collectDefaultCondition(classEntity);
         if(condition !=null&&condition.keySet().size()>0){
-            JSONObject selectCondition = EntityParseUtil.saveConditionToSelectCondition(condition);
+            Map one = EntityParseUtil.excludeNoExistColumn(condition, selectSql.getColumns());
+            JSONObject selectCondition = EntityParseUtil.saveConditionToSelectCondition(one);
             if(selectCondition!=null)
                 condition=selectCondition;
             EntityCondition condition1 = parserParamCondition(condition);
-            selectSql.setWheres(condition1);
+            if(entityCondition!=null&&condition1!=null){
+                EntityConditionDom conditionDom = new EntityConditionDom();
+                conditionDom.setLeft(entityCondition);
+                conditionDom.setRight(condition1);
+                conditionDom.setRelation("and");
+                selectSql.setWheres(conditionDom);
+            }else {
+                selectSql.setWheres(condition1==null?entityCondition:condition1);
+            }
         }
+        List<EntityOrderBy> orderBy=params.getOrderBy();
+        selectSql.getOrderBys().addAll(orderBy);
+        /*
         //2.确定查询的数据库表
         String tableName= ReflectEntity.reflectTableName(classEntity);
-        selectSql.setTabelName(tableName);
+        EntitySimpleJoinTable joinTable = new EntitySimpleJoinTable();
+        joinTable.setTableName(tableName);
+        selectSql.setTabelName(joinTable);
         //3.确定查询的列名
         List<EntityColumn> columnList=ReflectEntity.reflectSelectColumns(classEntity);
         selectSql.setColumns(columnList);
@@ -58,7 +126,7 @@ public class EntityParamParse {
                 order.setColumn(ReflectEntity.getTableField(classEntity, order.getColumn()));
             }
         }
-        selectSql.setOrderBys(params.getOrderBy());
+        selectSql.setOrderBys(params.getOrderBy());*/
         return selectSql;
     }
     private EntityCondition parserParamCondition(Map condition) throws NoSuchFieldException, ClassNotFoundException {
@@ -106,7 +174,13 @@ public class EntityParamParse {
         }else if(os !=null){
             if(!isRight) {
                 condition = new EntityConditionColumn();
-                ((EntityConditionColumn) condition).setColumn(ReflectEntity.getTableField(classEntity,(String) os));
+                for(EntityColumn conditionColumn:selectSql.getColumns()){
+                    String alias = StringUtils.isEmpty(conditionColumn.getAliasColumn())?conditionColumn.getAliasColumn():conditionColumn.getFieldName();
+                    if(alias.equals(os)){
+                        ((EntityConditionColumn) condition).setColumn(conditionColumn.getOrignColumn());
+                        ((EntityConditionColumn) condition).setTableAlias(conditionColumn.getTableAlias());
+                    }
+                }
             } else {
                 condition=new EntityConditionValue();
                 ((EntityConditionValue) condition).setColumn(os);

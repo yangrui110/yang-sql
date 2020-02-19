@@ -8,18 +8,21 @@ import top.sanguohf.egg.util.StringUtils;
 
 @Data
 public class EntitySimpleJoin implements SqlParse {
-    private JoinCondition joinConditions;
+    private String joinConditions;
     private String relation;
-    private EntityJoinTable tableName;
+    private String tableName;
     private String tableAlias;
 
     public String toSql() {
         StringBuilder builder = new StringBuilder();
         builder.append(relation).append(" ");
-        if(!StringUtils.isEmpty(tableAlias))
-            builder.append(tableAlias).append(".");
         builder.append(tableName).append(" ");
-        builder.append(joinConditions.toSql());
+        if(!StringUtils.isEmpty(tableAlias))
+            builder.append(tableAlias).append(" ");
+        if(!StringUtils.isEmpty(joinConditions))
+            builder.append(" on ");
+        //后期这里会变成子查询的范畴
+        builder.append(joinConditions);
         return builder.toString();
     }
 

@@ -1,9 +1,12 @@
 package top.sanguohf.egg.ops;
 
 import lombok.Data;
+import top.sanguohf.egg.base.EntitySimpleJoin;
 import top.sanguohf.egg.constant.DbType;
 import top.sanguohf.egg.util.EntityParseUtil;
 import top.sanguohf.egg.util.StringUtils;
+
+import java.util.List;
 
 @Data
 public class EntityPageSql {
@@ -82,8 +85,12 @@ public class EntityPageSql {
             builder.append(" where ").append("ROWNUM <").append(end);
         }
         //插入join条件
-        if(selectSql.getJoins() !=null)
-            builder.append(" ").append(selectSql.getJoins().toSql());
+        if(selectSql.getJoins() !=null){
+            List<EntitySimpleJoin> joins = selectSql.getJoins();
+            for(EntitySimpleJoin simpleJoin:joins){
+                builder.append(" ").append(simpleJoin.toSql());
+            }
+        }
         //
         if(selectSql.getOrderBys()!=null&&selectSql.getOrderBys().size()>0){
             builder.append(" ").append(" order by ").append(EntityParseUtil.parseList(selectSql.getOrderBys()));
@@ -101,8 +108,13 @@ public class EntityPageSql {
             builder.append(" where ").append(selectSql.getWheres().toSql());
         }
         //插入join条件
-        if(selectSql.getJoins() !=null)
-            builder.append(" ").append(selectSql.getJoins().toSql());
+        if(selectSql.getJoins() !=null) {
+            List<EntitySimpleJoin> joins = selectSql.getJoins();
+            for(EntitySimpleJoin simpleJoin:joins){
+                builder.append(" ").append(simpleJoin.toSql());
+            }
+
+        }
         //
         if(selectSql.getOrderBys()!=null&&selectSql.getOrderBys().size()>0){
             builder.append(" ").append(" order by ").append(EntityParseUtil.parseList(selectSql.getOrderBys()));

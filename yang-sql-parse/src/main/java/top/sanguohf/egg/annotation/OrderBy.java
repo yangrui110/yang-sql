@@ -5,7 +5,8 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface Field {
-    String value() default "";
-    String alias() default "";
+@Repeatable(OrderBys.class)
+public @interface OrderBy {
+    String direct() default "desc";
+    String column() default "";
 }

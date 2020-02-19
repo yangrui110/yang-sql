@@ -1,7 +1,10 @@
-package top.sanguohf.egg.reflect;
+package top.sanguohf.egg.test.entity;
 
 import lombok.Data;
-import top.sanguohf.egg.annotation.*;
+import top.sanguohf.egg.annotation.Field;
+import top.sanguohf.egg.annotation.Id;
+import top.sanguohf.egg.annotation.IgnoreSelectReback;
+import top.sanguohf.egg.annotation.TableName;
 
 @Data
 @TableName("user")
@@ -9,15 +12,9 @@ public class User {
     @Id
     @Field("user_name")
     private String userName;
-
     @IgnoreSelectReback
     private String password;
-
-    @IgnoreSelectReback
-    @OrderBy
     public String table;
-
-    @OrderBy
-    @Condition(value = "1",relation = "=")
     protected String id;
+
 }

@@ -7,13 +7,17 @@ import top.sanguohf.egg.ops.EntityPageSql;
 import top.sanguohf.egg.ops.EntitySelectSql;
 import top.sanguohf.egg.param.EntityParamParse;
 import top.sanguohf.egg.param.EntityParams;
+import top.sanguohf.egg.reflect.UserClassesView;
 
+import java.lang.reflect.Field;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainTest {
 
-    public static void main1(String[] args) throws ClassNotFoundException, NoSuchFieldException {
+    public static void mainy(String[] args) throws ClassNotFoundException, NoSuchFieldException {
         EntityParams params=new EntityParams();
         JSONObject os=new JSONObject();
         os.put("left","userName");
@@ -77,14 +81,51 @@ public class MainTest {
 
     public static void main(String[] args) throws ClassNotFoundException, NoSuchFieldException {
         JSONObject os=new JSONObject();
-        os.put("userName","admin1");
-        os.put("password","11122");
+        os.put("classesId","pmmm");
+        os.put("userName","yang");
         os.put("id","99");
         EntityParams params=new EntityParams();
-        params.setTableClassName("top.sanguohf.egg.reflect.User");
+        params.setTableClassName("top.sanguohf.egg.reflect.UserClassesView");
         params.setCondition(os);
-        new EntityParamParse(params).parseToEntityInertSql();
-        new EntityParamParse(params).parseToEntityUpdateSql();
-        new EntityParamParse(params).parseToEntityDeleteSql();
+       // new EntityParamParse(params).parseToEntityInertSql();
+        //new EntityParamParse(params).parseToEntityUpdateSql();
+        //new EntityParamParse(params).parseToEntityDeleteSql();
+        EntitySelectSql selectSql = new EntityParamParse(params).parseToEntitySelectSql();
+        System.out.println(selectSql.toSql());
+    }
+
+    public static void mainc(String[] args) throws ClassNotFoundException {
+        String content = "useriiii.userName=1 and user.password = 2 and user.id=3 and user.ps>0 and user.id > [ones] and user.po < [pj]";
+        String patter = "(?<=user\\.).*?(?==| |>|<)";
+        Pattern compile = Pattern.compile(patter);
+        Matcher matcher = compile.matcher(content);
+        StringBuffer stringBuffer = new StringBuffer();
+        while (matcher.find()){
+            String group = matcher.group();
+            matcher.appendReplacement(stringBuffer,"__");
+            //System.out.println(matcher.group());
+        }
+        matcher.appendTail(stringBuffer);
+        System.out.println(stringBuffer.toString());
+        System.out.println("--------------------");
+        String pattern2 = "(?<=\\[).*?(?=\\])";
+        Pattern compile2 = Pattern.compile(pattern2);
+        Matcher matcher2 = compile2.matcher(content);
+        while (matcher2.find()){
+            System.out.println(matcher2.group());
+        }
+        Class<?> forName = Class.forName("top.sanguohf.egg.reflect.User");
+        Field[] fields = forName.getDeclaredFields();
+        for(Field field:fields){
+            System.out.println(field.getGenericType().getTypeName());
+        }
+        //System.out.println(forName.getName());
+    }
+
+    public static void maink(String[] args) throws ClassNotFoundException, NoSuchFieldException {
+        EntityParams entityParams = new EntityParams();
+        entityParams.setTableClassName("top.sanguohf.egg.reflect.User");
+        EntitySelectSql selectSql = new EntityParamParse(entityParams).parseToEntitySelectSql();
+        System.out.println(selectSql.toSql());
     }
 }

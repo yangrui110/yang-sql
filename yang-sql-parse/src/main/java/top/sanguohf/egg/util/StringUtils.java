@@ -1,7 +1,10 @@
 package top.sanguohf.egg.util;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static top.sanguohf.egg.reflect.ReflectEntity.getTableField;
 
 public class StringUtils {
 
@@ -70,6 +73,23 @@ public class StringUtils {
             sb.append(matcher.end() == line.length() ? "" : "_");
         }
         return sb.toString();
+    }
+    /**
+     * 替换condition
+     * */
+    public static String patternReplace(Map<String,Class> map,String tableAlias,String condition) throws NoSuchFieldException, ClassNotFoundException {
+        String patter = "(?<=%s\\.).*?(?==| |>|<|$)";
+        String format = String.format(patter, tableAlias);
+        Pattern compile = Pattern.compile(format);
+        Matcher matcher = compile.matcher(condition);
+        StringBuffer buffer = new StringBuffer();
+        while (matcher.find()){
+            String group = matcher.group();
+            String tableField = getTableField(map.get(tableAlias), group);
+            matcher.appendReplacement(buffer,tableField);
+        }
+        matcher.appendTail(buffer);
+        return buffer.toString();
     }
 
 }

@@ -3,6 +3,7 @@ package top.sanguohf.egg.util;
 import com.alibaba.fastjson.JSONObject;
 import top.sanguohf.egg.SqlParse;
 import top.sanguohf.egg.base.EntityColumn;
+import top.sanguohf.egg.base.EntityCondition;
 import top.sanguohf.egg.base.EntityInsert;
 
 import java.util.HashMap;
@@ -71,4 +72,18 @@ public class EntityParseUtil {
         }
         return null;
     }
+    public static Map excludeNoExistColumn(Map condition,List<EntityColumn> list){
+        //排除掉不存在的列
+        Map one = new HashMap();
+        for(Object key:condition.keySet()){
+            for(EntityColumn column:list){
+                String alias = StringUtils.isEmpty(column.getAliasColumn())?column.getAliasColumn():column.getFieldName();
+                if(alias.equals(key)){
+                    one.put(key,condition.get(key));
+                }
+            }
+        }
+        return one;
+    }
+
 }

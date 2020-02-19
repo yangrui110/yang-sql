@@ -95,13 +95,13 @@ public class TestOne {
     @Test
     public void test6() throws NoSuchFieldException, IOException, ClassNotFoundException {
         EntityParams params = new EntityParams();
-        params.setTableClassName("UserOne");
-        JSONObject con1 = new JSONObject();
+        params.setTableClassName("Classes");
+        /*JSONObject con1 = new JSONObject();
         con1.put("userName","哈哈哈哈-1");
         con1.put("id","1998");
         con1.put("password","88888");
         params.setCondition(con1);
-        commonService.insert(params);
+        commonService.insert(params);*/
         List list = commonService.findList(params);
         System.out.println(list);
     }

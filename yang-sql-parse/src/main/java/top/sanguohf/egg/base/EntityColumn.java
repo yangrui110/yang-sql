@@ -10,6 +10,8 @@ public class EntityColumn implements SqlParse {
     private String orignColumn;
     private String aliasColumn;
     private String tableAlias;
+    //标识属性
+    private String fieldName;
 
     public String toSql() {
         StringBuilder builder = new StringBuilder();

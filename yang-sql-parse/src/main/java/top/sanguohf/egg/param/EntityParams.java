@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 import top.sanguohf.egg.base.EntityOrderBy;
 
+import java.util.LinkedList;
 import java.util.List;
 
 @Data
@@ -38,4 +39,10 @@ public class EntityParams {
      * */
     private JSONObject condition;
     private List<EntityOrderBy> orderBy;
+
+    public List<EntityOrderBy> getOrderBy() {
+        if(orderBy==null)
+            orderBy=new LinkedList<>();
+        return orderBy;
+    }
 }

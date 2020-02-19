@@ -7,13 +7,13 @@ import top.sanguohf.egg.util.StringUtils;
 @Data
 public class EntitySimpleJoinTable extends AbstractEntityJoinTable {
 
-    private EntityJoinTable tableName;
+    private String tableName;
 
     public String toSql() {
         StringBuilder builder=new StringBuilder();
+        builder.append(tableName);
         if(!StringUtils.isEmpty(tableAlias))
-            builder.append(tableAlias).append(".");
-        builder.append(tableName.toSql());
+            builder.append(" ").append(tableAlias);
         return builder.toString();
     }
 
