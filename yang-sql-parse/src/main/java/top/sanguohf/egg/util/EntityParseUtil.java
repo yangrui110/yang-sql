@@ -3,13 +3,11 @@ package top.sanguohf.egg.util;
 import com.alibaba.fastjson.JSONObject;
 import top.sanguohf.egg.SqlParse;
 import top.sanguohf.egg.base.EntityColumn;
-import top.sanguohf.egg.base.EntityCondition;
 import top.sanguohf.egg.base.EntityInsert;
-
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.*;
 
 public class EntityParseUtil {
     public static List<EntityColumn> getColumns(Class param) {
@@ -31,18 +29,35 @@ public class EntityParseUtil {
         return builder.toString();
     }
 
-    public static String listInsertsToString(List<EntityInsert> inserts, String split){
+    /**
+     * 给prepareStatement设值
+     * */
+    public static PreparedStatement setValueForStatement(List<EntityInsert> inserts,String sql,Connection connection) throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        for(int i =0;i<inserts.size();i++){
+            Object value=inserts.get(i).getValue();
+            if(value instanceof Date){
+                value = new java.sql.Date(((Date) value).getTime());
+            }
+            preparedStatement.setObject(i+1,value);
+        }
+        return preparedStatement;
+    }
+
+    public static String listInsertsToString(List<EntityInsert> inserts, String split,boolean isPrepare){
         StringBuilder builder = new StringBuilder();
         for(int i=0;i<inserts.size();i++){
             builder.append(inserts.get(i).getColumn()).append(" = ");
             Object value=inserts.get(i).getValue();
-            if(value instanceof String){
-                builder.append("'");
-            }
-            builder.append(value);
-            if(value instanceof String){
-                builder.append("'");
-            }
+            if(!isPrepare) {
+                if (value instanceof String) {
+                    builder.append("'");
+                }
+                builder.append(value);
+                if (value instanceof String) {
+                    builder.append("'");
+                }
+            }else builder.append("?");
             if(i!=inserts.size()-1)
                 builder.append(split);
         }

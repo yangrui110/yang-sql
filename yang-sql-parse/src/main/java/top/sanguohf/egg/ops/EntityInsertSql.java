@@ -2,7 +2,11 @@ package top.sanguohf.egg.ops;
 import lombok.Data;
 import top.sanguohf.egg.base.EntityInsert;
 import top.sanguohf.egg.constant.DbType;
+import top.sanguohf.egg.util.EntityParseUtil;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 
 @Data
@@ -12,6 +16,26 @@ public class EntityInsertSql extends AbstractEntityJoinTable {
     private List<EntityInsert> insertList;
 
     public String toSql() {
+
+        return sqlOne(false);
+    }
+
+    public String toSql(DbType dbType) {
+        return toSql();
+    }
+
+    @Override
+    public PreparedStatement toSql(Connection connection) throws SQLException {
+        String sqlOne = sqlOne(true);
+        return EntityParseUtil.setValueForStatement(insertList,sqlOne,connection);
+    }
+
+    @Override
+    public PreparedStatement toSql(Connection connection, DbType dbType) throws SQLException {
+        return toSql(connection);
+    }
+
+    public String sqlOne(boolean isPrepare){
         StringBuilder builder = new StringBuilder();
         builder.append(" insert into ")
                 .append(tableName).append("(");
@@ -23,19 +47,17 @@ public class EntityInsertSql extends AbstractEntityJoinTable {
         builder.append(")").append(" values(");
         for(int i =0;i<insertList.size();i++){
             Object value=insertList.get(i).getValue();
-            if(value instanceof String)
-                builder.append("'");
-            builder.append(value);
-            if(value instanceof String)
-                builder.append("'");
+            if(!isPrepare) {
+                if (value instanceof String)
+                    builder.append("'");
+                builder.append(value);
+                if (value instanceof String)
+                    builder.append("'");
+            }else builder.append("?");
             if(i!=insertList.size()-1)
                 builder.append(",");
         }
         builder.append(")");
         return builder.toString();
-    }
-
-    public String toSql(DbType dbType) {
-        return toSql();
     }
 }

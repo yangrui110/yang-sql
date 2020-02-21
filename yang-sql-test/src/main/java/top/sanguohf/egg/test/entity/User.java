@@ -6,6 +6,8 @@ import top.sanguohf.egg.annotation.Id;
 import top.sanguohf.egg.annotation.IgnoreSelectReback;
 import top.sanguohf.egg.annotation.TableName;
 
+import java.math.BigDecimal;
+
 @Data
 @TableName("user")
 public class User {
@@ -16,5 +18,6 @@ public class User {
     private String password;
     public String table;
     protected String id;
+    private BigDecimal price;
 
 }

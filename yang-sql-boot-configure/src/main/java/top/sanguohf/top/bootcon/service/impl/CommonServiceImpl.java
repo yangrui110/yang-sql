@@ -1,9 +1,10 @@
 package top.sanguohf.top.bootcon.service.impl;
 
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import top.sanguohf.egg.base.EntityInsert;
 import top.sanguohf.egg.ops.*;
 import top.sanguohf.egg.param.EntityParamParse;
 import top.sanguohf.egg.param.EntityParams;
-import top.sanguohf.top.bootcon.callback.BatchInsertCallback;
 import top.sanguohf.top.bootcon.config.DataBaseTypeInit;
 import top.sanguohf.top.bootcon.config.ScanEntityConfigure;
 import top.sanguohf.top.bootcon.page.Page;
@@ -17,6 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +78,14 @@ public class CommonServiceImpl implements CommonService {
     public void insert(EntityParams paramData) throws ClassNotFoundException, NoSuchFieldException, IOException {
         EntityParams params1 = inteceptor(paramData);
         EntityInsertSql insertSql = new EntityParamParse(params1).parseToEntityInertSql();
-        jdbcTemplate.execute(insertSql.toSql(dbType.getDbType()));
+        jdbcTemplate.update(new PreparedStatementCreator() {
+            @Override
+            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+                PreparedStatement statement = insertSql.toSql(connection);
+                return statement;
+            }
+        });
+//        jdbcTemplate.execute(insertSql.toSql(dbType.getDbType()));
     }
 
     @Transactional
@@ -82,14 +93,26 @@ public class CommonServiceImpl implements CommonService {
     public void update(EntityParams paramsData) throws ClassNotFoundException, NoSuchFieldException, IOException {
         EntityParams params1 = inteceptor(paramsData);
         EntityUpdateSql updateSql = new EntityParamParse(params1).parseToEntityUpdateSql();
-        jdbcTemplate.update(updateSql.toSql(dbType.getDbType()));
+        jdbcTemplate.update(new PreparedStatementCreator() {
+            @Override
+            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+                PreparedStatement statement = updateSql.toSql(connection);
+                return statement;
+            }
+        });
     }
 
     @Override
     public void delete(EntityParams paramsData) throws ClassNotFoundException, NoSuchFieldException, IOException {
         EntityParams params1 = inteceptor(paramsData);
         EntityDeleteSql deleteSql = new EntityParamParse(params1).parseToEntityDeleteSql();
-        jdbcTemplate.execute(deleteSql.toSql(dbType.getDbType()));
+        jdbcTemplate.update(new PreparedStatementCreator() {
+            @Override
+            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+                PreparedStatement statement = deleteSql.toSql(connection);
+                return statement;
+            }
+        });
     }
 
     @Transactional
@@ -97,52 +120,123 @@ public class CommonServiceImpl implements CommonService {
     public void batchInsert(List<EntityParams> params) throws IOException {
         if(params.size()>0) {
             List<EntityParams> entityParams = inteceptorList(params);
-            LinkedList<String> strings = entityParams.stream().collect(LinkedList<String>::new, (list, v) -> {
+            LinkedList<EntityInsertSql> strings = entityParams.stream().collect(LinkedList<EntityInsertSql>::new, (list, v) -> {
                 try {
                     EntityInsertSql updateSql = new EntityParamParse(v).parseToEntityInertSql();
-                    list.add(updateSql.toSql(dbType.getDbType()));
+                    list.add(updateSql);
                 } catch (ClassNotFoundException | NoSuchFieldException e) {
                     e.printStackTrace();
                 }
             }, List::addAll);
-            BatchInsertCallback callback = new BatchInsertCallback(strings);
-            jdbcTemplate.execute(callback);
+            //检测长度是否是一致
+            EntityInsertSql first = strings.getFirst();
+            for(EntityInsertSql one:strings){
+                if(first.getInsertList().size()!=one.getInsertList().size()){
+                    throw new RuntimeException("批量插入的数据列数不一致");
+                }
+            }
+            List<Object[]> values = new LinkedList<>();
+            //保证排序的一致性
+            List<EntityInsert> insertList = first.getInsertList();
+
+            //根据列名的顺序收集到值
+            for (EntityInsertSql one : strings) {
+                List<EntityInsert> list = one.getInsertList();
+                values.add(collectSortValue(list,insertList));
+            }
+            //获取到预加载的sql语句
+            String sqlOne = first.sqlOne(true);
+            jdbcTemplate.batchUpdate(sqlOne,values);
         }
     }
 
+    private Object[] collectSortValue(List<EntityInsert> list,List<EntityInsert> firstDomColumns){
+        Object[] value = new Object[list.size()];
+        int i= 0;
+        for(EntityInsert insert:firstDomColumns) {
+            boolean exist =false;
+            for (EntityInsert cur:list) {
+                if(cur.getColumn().equalsIgnoreCase(insert.getColumn())) {
+                    value[i] = cur.getValue();
+                    i++;
+                    exist = true;
+                }
+            }
+            if(!exist)
+                throw new RuntimeException("当前列名："+insert.getColumn()+"不存在");
+        }
+        return value;
+    }
     @Transactional
     @Override
     public void batchUpdate(List<EntityParams> params) throws IOException {
         if(params.size()>0) {
             List<EntityParams> entityParams = inteceptorList(params);
-            LinkedList<String> strings = entityParams.stream().collect(LinkedList<String>::new, (list, v) -> {
+            LinkedList<EntityUpdateSql> strings = entityParams.stream().collect(LinkedList<EntityUpdateSql>::new, (list, v) -> {
                 try {
                     EntityUpdateSql updateSql = new EntityParamParse(v).parseToEntityUpdateSql();
-                    list.add(updateSql.toSql(dbType.getDbType()));
+                    list.add(updateSql);
                 } catch (ClassNotFoundException | NoSuchFieldException e) {
                     e.printStackTrace();
                 }
             }, List::addAll);
-            BatchInsertCallback callback = new BatchInsertCallback(strings);
-            jdbcTemplate.execute(callback);
+            //检测长度是否是一致
+            EntityUpdateSql first = strings.getFirst();
+            for(EntityUpdateSql one:strings){
+                int len1 = first.getWheres().size()+first.getUpdates().size();
+                int len2 = one.getUpdates().size()+one.getWheres().size();
+                if(len1!=len2){
+                    throw new RuntimeException("批量更新的数据列不一致");
+                }
+            }
+            List<Object[]> values = new LinkedList<>();
+            //根据列名的顺序收集到值
+            for (EntityUpdateSql one : strings) {
+                Object[] updates = collectSortValue(one.getUpdates(), first.getUpdates());
+                Object[] wheres = collectSortValue(one.getWheres(), first.getWheres());
+                Object[] objects = new Object[updates.length + wheres.length];
+                System.arraycopy(updates,0,objects,0,updates.length);
+                System.arraycopy(wheres,0,objects,updates.length,wheres.length);
+                values.add(objects);
+            }
+            //获取到预加载的sql语句
+            String sqlOne = first.one(true);
+            System.out.println(sqlOne);
+            jdbcTemplate.batchUpdate(sqlOne,values);
         }
-        //jdbcTemplate.batchUpdate(strings.get(0),strings.get(1));
     }
 
     @Override
     public void batchDelete(List<EntityParams> params) throws IOException {
         if(params.size()>0) {
             List<EntityParams> entityParams = inteceptorList(params);
-            LinkedList<String> strings = entityParams.stream().collect(LinkedList<String>::new, (list, v) -> {
+            LinkedList<EntityDeleteSql> strings = entityParams.stream().collect(LinkedList<EntityDeleteSql>::new, (list, v) -> {
                 try {
                     EntityDeleteSql updateSql = new EntityParamParse(v).parseToEntityDeleteSql();
-                    list.add(updateSql.toSql(dbType.getDbType()));
+                    list.add(updateSql);
                 } catch (ClassNotFoundException | NoSuchFieldException e) {
                     e.printStackTrace();
                 }
             }, List::addAll);
-            BatchInsertCallback callback = new BatchInsertCallback(strings);
-            jdbcTemplate.execute(callback);
+            //检测长度是否是一致
+            EntityDeleteSql first = strings.getFirst();
+            for(EntityDeleteSql one:strings){
+                if(first.getWheres().size()!=one.getWheres().size()){
+                    throw new RuntimeException("批量删除数据列数不一致");
+                }
+            }
+            List<Object[]> values = new LinkedList<>();
+            //保证排序的一致性
+            List<EntityInsert> insertList = first.getWheres();
+
+            //根据列名的顺序收集到值
+            for (EntityDeleteSql one : strings) {
+                List<EntityInsert> list = one.getWheres();
+                values.add(collectSortValue(list,insertList));
+            }
+            //获取到预加载的sql语句
+            String sqlOne = first.one(true);
+            jdbcTemplate.batchUpdate(sqlOne,values);
         }
     }
 

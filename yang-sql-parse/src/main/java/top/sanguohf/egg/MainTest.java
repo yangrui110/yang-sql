@@ -3,6 +3,7 @@ package top.sanguohf.egg;
 import com.alibaba.fastjson.JSONObject;
 import top.sanguohf.egg.base.EntityOrderBy;
 import top.sanguohf.egg.constant.DbType;
+import top.sanguohf.egg.ops.EntityDeleteSql;
 import top.sanguohf.egg.ops.EntityPageSql;
 import top.sanguohf.egg.ops.EntitySelectSql;
 import top.sanguohf.egg.param.EntityParamParse;
@@ -79,19 +80,19 @@ public class MainTest {
         //System.out.println(entity.reflectSelectColumns(User.class));
     }
 
-    public static void maini(String[] args) throws ClassNotFoundException, NoSuchFieldException {
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchFieldException {
         JSONObject os=new JSONObject();
-        os.put("classesId","pmmm");
+        os.put("password","pmmm");
         os.put("userName","yang");
         os.put("id","99");
         EntityParams params=new EntityParams();
-        params.setTableClassName("top.sanguohf.egg.reflect.UserClassesView");
+        params.setTableClassName("top.sanguohf.egg.reflect.User");
         params.setCondition(os);
        // new EntityParamParse(params).parseToEntityInertSql();
         //new EntityParamParse(params).parseToEntityUpdateSql();
-        //new EntityParamParse(params).parseToEntityDeleteSql();
-        EntitySelectSql selectSql = new EntityParamParse(params).parseToEntitySelectSql();
-        System.out.println(selectSql.toSql());
+        EntityDeleteSql deleteSql = new EntityParamParse(params).parseToEntityDeleteSql();
+        //EntitySelectSql selectSql = new EntityParamParse(params).parseToEntitySelectSql();
+        //System.out.println(selectSql.toSql());
     }
 
     public static void mainc(String[] args) throws ClassNotFoundException {
@@ -122,7 +123,7 @@ public class MainTest {
         //System.out.println(forName.getName());
     }
 
-    public static void main(String[] args) throws ClassNotFoundException, NoSuchFieldException {
+    public static void mainl(String[] args) throws ClassNotFoundException, NoSuchFieldException {
         EntityParams entityParams = new EntityParams();
         entityParams.setTableClassName("top.sanguohf.egg.reflect.UserClassesView");
         EntitySelectSql selectSql = new EntityParamParse(entityParams).parseToEntitySelectSql();

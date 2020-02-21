@@ -1,6 +1,7 @@
 package top.sanguohf.egg.test;
 
 import com.alibaba.fastjson.JSONObject;
+import com.mysql.cj.jdbc.Blob;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ import top.sanguohf.top.bootcon.resp.CommonPageResp;
 import top.sanguohf.top.bootcon.service.CommonService;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -72,12 +75,15 @@ public class TestOne {
         EntityParams params = new EntityParams();
         params.setTableClassName("UserOne");
         JSONObject con1 = new JSONObject();
-        con1.put("userName","哈哈哈哈-1");
-        con1.put("id","1001");
+        con1.put("userName","哈哈哈哈-8");
+        con1.put("id","999000");
+        con1.put("price",new BigDecimal(20.1));
+        con1.put("blobOne",new Date());
+        con1.put("bys","我是比爸爸".getBytes());
         params.setCondition(con1);
-        commonService.update(params);
-        List list = commonService.findList(params);
-        System.out.println(list);
+        commonService.delete(params);
+        //List list = commonService.findList(params);
+        //System.out.println(list);
     }
     @Test
     public void test5() throws NoSuchFieldException, IOException, ClassNotFoundException {
@@ -113,22 +119,21 @@ public class TestOne {
         params1.setTableClassName("UserOne");
         JSONObject con1 = new JSONObject();
         con1.put("userName","哈哈哈哈-3");
-        con1.put("id","1998-1");  //只会根据主键删除
-        con1.put("password","88888-3");
+        con1.put("id","1998-199");  //只会根据主键删除
+        con1.put("password","88888-3-8");
         params1.setCondition(con1);
 
         EntityParams params2 = new EntityParams();
         params2.setTableClassName("UserOne");
         JSONObject con2 = new JSONObject();
-        con2.put("userName","哈哈哈哈-4");
-        con2.put("id","19980");//只会根据主键删除
-        con2.put("password","88888-4");
+        con2.put("password","88888-4-7");
+        con2.put("id","19980999");//只会根据主键删除
+        con2.put("userName","哈哈哈哈-7");
         params2.setCondition(con2);
 
         linkedList.add(params1);
         linkedList.add(params2);
-        commonService.batchDelete(linkedList);
-
+        commonService.batchUpdate(linkedList);
     }
 
 }

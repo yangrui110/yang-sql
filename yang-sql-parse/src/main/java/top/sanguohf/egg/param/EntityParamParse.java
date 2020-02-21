@@ -206,7 +206,6 @@ public class EntityParamParse {
 
         insertSql.setTableName(ReflectEntity.reflectTableName(classEntity));
         insertSql.setInsertList(inserts);
-        System.out.println(insertSql.toSql());
         return insertSql;
     }
 

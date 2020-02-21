@@ -3,6 +3,8 @@ package top.sanguohf.egg.reflect;
 import lombok.Data;
 import top.sanguohf.egg.annotation.*;
 
+import java.math.BigDecimal;
+
 @Data
 @TableName("user")
 public class User {
@@ -20,4 +22,8 @@ public class User {
     @OrderBy
     @Condition(value = "1",relation = "=")
     protected String id;
+
+    private BigDecimal price;
+
+
 }

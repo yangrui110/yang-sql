@@ -9,6 +9,9 @@ import top.sanguohf.egg.constant.DbType;
 import top.sanguohf.egg.util.EntityParseUtil;
 import top.sanguohf.egg.util.StringUtils;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -51,6 +54,16 @@ public class EntitySelectSql extends AbstractEntityJoinTable {
 
     public String toSql(DbType dbType) {
         return toSql();
+    }
+
+    @Override
+    public PreparedStatement toSql(Connection connection) throws SQLException {
+        return null;
+    }
+
+    @Override
+    public PreparedStatement toSql(Connection connection, DbType dbType) throws SQLException {
+        return null;
     }
 
     public List<EntityColumn> getColumns() {
