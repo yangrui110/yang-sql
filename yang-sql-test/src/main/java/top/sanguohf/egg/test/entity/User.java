@@ -16,7 +16,6 @@ public class User {
     private String userName;
     @IgnoreSelectReback
     private String password;
-    public String table;
     protected String id;
     private BigDecimal price;
 

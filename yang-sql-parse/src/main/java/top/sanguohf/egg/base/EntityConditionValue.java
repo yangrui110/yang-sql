@@ -4,6 +4,8 @@ import lombok.Data;
 import top.sanguohf.egg.constant.DbType;
 import top.sanguohf.egg.util.StringUtils;
 
+import java.util.List;
+
 @Data
 public class EntityConditionValue implements EntityCondition {
 
@@ -12,18 +14,30 @@ public class EntityConditionValue implements EntityCondition {
     private String tableAlias;
 
     public String toSql() {
-        StringBuilder builder=new StringBuilder();
-        if(!StringUtils.isEmpty(tableAlias))
-            builder.append(tableAlias).append(".");
-        if(column instanceof String)
-            builder.append("'");
-        builder.append(column);
-        if(column instanceof String)
-            builder.append("'");
-        return builder.toString();
+        return sqlOne(false);
     }
 
     public String toSql(DbType dbType) {
         return toSql();
+    }
+
+    @Override
+    public String sqlOne(boolean isPrepare) {
+        StringBuilder builder = new StringBuilder();
+        if (!StringUtils.isEmpty(tableAlias))
+            builder.append(tableAlias).append(".");
+        if (!isPrepare){
+            if (column instanceof String)
+                builder.append("'");
+            builder.append(column);
+            if (column instanceof String)
+                builder.append("'");
+        }else builder.append("?");
+        return builder.toString();
+    }
+
+    @Override
+    public void addValue(List list) {
+        list.add(column);
     }
 }

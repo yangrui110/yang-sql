@@ -12,11 +12,20 @@ public class EntityListCondition implements EntityCondition {
     private String combine;
 
     public String toSql() {
+        return sqlOne(false);
+    }
+
+    public String toSql(DbType dbType) {
+        return toSql();
+    }
+
+    @Override
+    public String sqlOne(boolean isPrepare) {
         StringBuilder builder = new StringBuilder();
         if(condition.size()>0)
             builder.append(" (");
         for(int i=0;i<condition.size();i++){
-            builder.append(condition.get(i).toSql()).append(" ");
+            builder.append(condition.get(i).sqlOne(isPrepare)).append(" ");
             if(i!=condition.size()-1)
                 builder.append(combine).append(" ");
         }
@@ -25,7 +34,10 @@ public class EntityListCondition implements EntityCondition {
         return builder.toString();
     }
 
-    public String toSql(DbType dbType) {
-        return toSql();
+    @Override
+    public void addValue(List list) {
+        for(EntityConditionDom dom:condition){
+            dom.addValue(list);
+        }
     }
 }

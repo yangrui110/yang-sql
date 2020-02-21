@@ -12,7 +12,7 @@ public class User {
     @Field("user_name")
     private String userName;
 
-    @IgnoreSelectReback
+    //@IgnoreSelectReback
     private String password;
 
     @IgnoreSelectReback

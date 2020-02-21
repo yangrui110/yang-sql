@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 
 public class MainTest {
 
-    public static void mainy(String[] args) throws ClassNotFoundException, NoSuchFieldException {
+    public static void mainb(String[] args) throws ClassNotFoundException, NoSuchFieldException {
         EntityParams params=new EntityParams();
         JSONObject os=new JSONObject();
         os.put("left","userName");
@@ -74,13 +74,19 @@ public class MainTest {
         os0.put("password","11122");
         //params.setData(os0);
         EntitySelectSql selectSql=new EntityParamParse(params).parseToEntitySelectSql();
-        System.out.println(new EntityPageSql(selectSql).toPageSql(1,10, DbType.ORACLE));
-        System.out.println(new EntityPageSql(selectSql).toCountSql(DbType.SQL));
+        System.out.println(selectSql.toSql());
+        System.out.println(selectSql.sqlOne(true));
+        LinkedList linkedList = new LinkedList<>();
+        selectSql.addValue(linkedList);
+        System.out.println(linkedList);
+       // System.out.println(selectSql.);
+        //System.out.println(new EntityPageSql(selectSql).toPageSql(1,10, DbType.ORACLE));
+        //System.out.println(new EntityPageSql(selectSql).toCountSql(DbType.SQL));
         //ReflectEntity entity = new ReflectEntity();
         //System.out.println(entity.reflectSelectColumns(User.class));
     }
 
-    public static void main(String[] args) throws ClassNotFoundException, NoSuchFieldException {
+    public static void maint(String[] args) throws ClassNotFoundException, NoSuchFieldException {
         JSONObject os=new JSONObject();
         os.put("password","pmmm");
         os.put("userName","yang");
@@ -95,7 +101,7 @@ public class MainTest {
         //System.out.println(selectSql.toSql());
     }
 
-    public static void mainc(String[] args) throws ClassNotFoundException {
+    public static void main(String[] args) throws ClassNotFoundException {
         String content = "useriiii.userName=1 and user.password = 2 and user.id=3 and user.ps>0 and user.id > [ones] and user.po < [pj]";
         String patter = "(?<=user\\.).*?(?==| |>|<)";
         Pattern compile = Pattern.compile(patter);
@@ -109,7 +115,7 @@ public class MainTest {
         matcher.appendTail(stringBuffer);
         System.out.println(stringBuffer.toString());
         System.out.println("--------------------");
-        String pattern2 = "(?<=\\[).*?(?=\\])";
+        String pattern2 = "\\[.*?\\]";
         Pattern compile2 = Pattern.compile(pattern2);
         Matcher matcher2 = compile2.matcher(content);
         while (matcher2.find()){

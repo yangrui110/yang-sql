@@ -22,7 +22,7 @@ public class EntityUpdateSql extends AbstractEntityJoinTable {
     private List<EntityInsert> wheres;
 
     public String toSql() {
-        return one(false);
+        return sqlOne(false);
     }
 
     public String toSql(DbType dbType) {
@@ -31,7 +31,7 @@ public class EntityUpdateSql extends AbstractEntityJoinTable {
 
     @Override
     public PreparedStatement toSql(Connection connection) throws SQLException {
-        String sqlOne = one(true);
+        String sqlOne = sqlOne(true);
         LinkedList<EntityInsert> list = new LinkedList<>();
         list.addAll(updates);
         list.addAll(wheres);
@@ -43,11 +43,22 @@ public class EntityUpdateSql extends AbstractEntityJoinTable {
         return toSql(connection);
     }
 
-    public String one(boolean isPrepare){
+    @Override
+    public String sqlOne(boolean isPrepare){
         StringBuilder builder = new StringBuilder();
         builder.append("update ").append(tableName).append(" set ");
         builder.append(EntityParseUtil.listInsertsToString(updates,",",isPrepare));
         builder.append(" where ").append(EntityParseUtil.listInsertsToString(wheres," and ",isPrepare));
         return builder.toString();
+    }
+
+    @Override
+    public void addValue(List list) {
+        for(EntityInsert insert:updates){
+            insert.addValue(list);
+        }
+        for(EntityInsert insert:wheres){
+            insert.addValue(list);
+        }
     }
 }

@@ -2,8 +2,16 @@ package top.sanguohf.egg.util;
 
 import com.alibaba.fastjson.JSONObject;
 import top.sanguohf.egg.SqlParse;
-import top.sanguohf.egg.base.EntityColumn;
-import top.sanguohf.egg.base.EntityInsert;
+import top.sanguohf.egg.annotation.MainTable;
+import top.sanguohf.egg.annotation.TableName;
+import top.sanguohf.egg.annotation.ViewTable;
+import top.sanguohf.egg.base.*;
+import top.sanguohf.egg.ops.EntityJoinTable;
+import top.sanguohf.egg.ops.EntitySelectSql;
+import top.sanguohf.egg.ops.EntitySimpleJoinTable;
+import top.sanguohf.egg.reflect.ReflectEntity;
+
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -87,18 +95,73 @@ public class EntityParseUtil {
         }
         return null;
     }
-    public static Map excludeNoExistColumn(Map condition,List<EntityColumn> list){
+    public static void excludeNoExistColumn(Map condition,List<EntityColumn> list){
         //排除掉不存在的列
-        Map one = new HashMap();
+        //Map one = new HashMap();
         for(Object key:condition.keySet()){
+            boolean exist = false;
             for(EntityColumn column:list){
                 String alias = StringUtils.isEmpty(column.getAliasColumn())?column.getAliasColumn():column.getFieldName();
-                if(alias.equals(key)){
-                    one.put(key,condition.get(key));
+                if(alias.equalsIgnoreCase((String) key)){
+                    //one.put(key,condition.get(key));
+                    exist = true;
                 }
             }
+            if(!exist)
+                throw new RuntimeException("列："+key+"不存在");
         }
-        return one;
+        //return one;
+    }
+
+    public static EntityJoinTable parseViewEntityTable(Class entity) throws ClassNotFoundException, NoSuchFieldException {
+        EntitySelectSql selectSql = new EntitySelectSql();
+        Field[] fields = entity.getDeclaredFields();
+        boolean present = entity.isAnnotationPresent(ViewTable.class);
+        if(present) {
+            //设置表别名
+            for (Field field : fields) {
+                Class<?> forName = Class.forName(field.getGenericType().getTypeName());
+                if (field.isAnnotationPresent(MainTable.class)) {
+                    //解析出主表
+                    MainTable fieldAnnotation = field.getAnnotation(MainTable.class);
+                    if (forName.isAnnotationPresent(ViewTable.class)) {
+                        EntityJoinTable entityJoinTable = parseViewEntityTable(forName);
+                        selectSql.setTabelName(entityJoinTable);
+                        selectSql.setTableAlias(fieldAnnotation.tableAlias());
+                    } else {
+                        EntitySimpleJoinTable joinTable = new EntitySimpleJoinTable();
+                        joinTable.setTableAlias(fieldAnnotation.tableAlias());
+                        if (forName.isAnnotationPresent(TableName.class))
+                            joinTable.setTableName(forName.getAnnotation(TableName.class).value());
+                        else joinTable.setTableName(StringUtils.camel2Underline(forName.getSimpleName()));
+                        //设置表名
+                        selectSql.setTabelName(joinTable);
+                    }
+                }
+            }
+        }else {
+            String tableName= ReflectEntity.reflectTableName(entity);
+            EntitySimpleJoinTable joinTable = new EntitySimpleJoinTable();
+            joinTable.setTableName(tableName);
+            selectSql.setTabelName(joinTable);
+        }
+        if(present) {
+            List<EntityColumn> viewTableColumns = ReflectEntity.getViewTableColumns(entity);
+            selectSql.getColumns().addAll(viewTableColumns);
+        }else {
+            List<EntityColumn> viewTableColumns = ReflectEntity.reflectSelectColumns(entity);
+            selectSql.getColumns().addAll(viewTableColumns);
+        }
+        //获取到关联条件
+        List<EntitySimpleJoin> relationJoins = ReflectEntity.getRelationJoins(entity);
+        selectSql.setJoins(relationJoins);
+        //设置条件
+        EntityCondition entityCondition = ReflectEntity.collectDefaultCondition(entity);
+        selectSql.setWheres(entityCondition);
+        //设置排序
+        List<EntityOrderBy> orderByList = ReflectEntity.collectDefaultOrderBy(entity);
+        selectSql.setOrderBys(orderByList);
+        return selectSql;
     }
 
 }

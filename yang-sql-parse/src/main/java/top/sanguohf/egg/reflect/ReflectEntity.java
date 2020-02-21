@@ -312,6 +312,8 @@ public class ReflectEntity {
                     String condition = annotation.condition();
                     for (String alias : list) {
                         condition = StringUtils.patternReplace(map, alias, condition);
+                        //获取到在condition中定义的表
+                        condition = StringUtils.patternTableName(condition);
                     }
                     simpleJoin.setJoinConditions(condition);
                     simpleJoins.add(simpleJoin);

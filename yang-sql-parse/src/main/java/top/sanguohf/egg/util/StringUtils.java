@@ -1,5 +1,8 @@
 package top.sanguohf.egg.util;
 
+import top.sanguohf.egg.constant.ScanPackage;
+import top.sanguohf.egg.ops.EntityJoinTable;
+
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -75,7 +78,7 @@ public class StringUtils {
         return sb.toString();
     }
     /**
-     * 替换condition
+     * 替换condition中的列名
      * */
     public static String patternReplace(Map<String,Class> map,String tableAlias,String condition) throws NoSuchFieldException, ClassNotFoundException {
         String patter = "(?<=%s\\.).*?(?==| |>|<|$)";
@@ -87,6 +90,38 @@ public class StringUtils {
             String group = matcher.group();
             String tableField = getTableField(map.get(tableAlias), group);
             matcher.appendReplacement(buffer,tableField);
+        }
+        matcher.appendTail(buffer);
+        return buffer.toString();
+    }
+
+    /***
+     * 替换condition中的表名
+     */
+    public static String patternTableName(String condition) throws NoSuchFieldException {
+        String pattern = "\\[.*?\\]";
+        Pattern compile = Pattern.compile(pattern);
+        Matcher matcher = compile.matcher(condition);
+        StringBuffer buffer = new StringBuffer();
+        String[] packages = ScanPackage.getPackage();
+        StringBuilder stringBuilder = new StringBuilder();
+        while (matcher.find()){
+            String group = matcher.group();
+            group = group.replaceAll("\\[","");
+            group = group.replaceAll("\\]","");
+            boolean exist = false;
+            for(String one: packages){
+                try {
+                    Class<?> aClass = Class.forName(one + "." + group);
+                    EntityJoinTable entityJoinTable = EntityParseUtil.parseViewEntityTable(aClass);
+                    exist = true;
+                    stringBuilder.append("(").append(entityJoinTable.toSql()).append(")");
+                } catch (ClassNotFoundException e) {
+                }
+            }
+            if(!exist)
+                throw new RuntimeException("未找到condition"+condition+"中的类："+group);
+            matcher.appendReplacement(buffer,stringBuilder.toString());
         }
         matcher.appendTail(buffer);
         return buffer.toString();

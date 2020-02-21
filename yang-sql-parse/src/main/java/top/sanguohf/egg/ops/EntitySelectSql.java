@@ -12,6 +12,7 @@ import top.sanguohf.egg.util.StringUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -24,6 +25,35 @@ public class EntitySelectSql extends AbstractEntityJoinTable {
     private List<EntityOrderBy> orderBys;
 
     public String toSql() {
+        return sqlOne(false);
+    }
+
+    public String toSql(DbType dbType) {
+        return toSql();
+    }
+
+    @Override
+    public PreparedStatement toSql(Connection connection) throws SQLException {
+        String sql = sqlOne(true);
+        LinkedList list = new LinkedList<>();
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        for(int i=0;i<list.size();i++){
+            Object o = list.get(i);
+            if(o instanceof Date){
+                o=new java.sql.Date(((Date)o).getTime());
+            }
+            preparedStatement.setObject(i+1,o);
+        }
+        return preparedStatement;
+    }
+
+    @Override
+    public PreparedStatement toSql(Connection connection, DbType dbType) throws SQLException {
+        return toSql(connection);
+    }
+
+    @Override
+    public String sqlOne(boolean isPrepare) {
         StringBuilder builder = new StringBuilder();
         builder.append("select ").append(EntityParseUtil.parseList(columns));
         builder.append(" from ");
@@ -44,26 +74,12 @@ public class EntitySelectSql extends AbstractEntityJoinTable {
         }
         //构造Where条件
         if(wheres!=null)
-            builder.append(" where ").append(wheres.toSql());
+            builder.append(" where ").append(wheres.sqlOne(isPrepare));
         //
         if(orderBys!=null&&orderBys.size()>0){
             builder.append(" ").append(" order by ").append(EntityParseUtil.parseList(orderBys));
         }
         return builder.toString();
-    }
-
-    public String toSql(DbType dbType) {
-        return toSql();
-    }
-
-    @Override
-    public PreparedStatement toSql(Connection connection) throws SQLException {
-        return null;
-    }
-
-    @Override
-    public PreparedStatement toSql(Connection connection, DbType dbType) throws SQLException {
-        return null;
     }
 
     public List<EntityColumn> getColumns() {
@@ -76,5 +92,11 @@ public class EntitySelectSql extends AbstractEntityJoinTable {
         if(orderBys==null)
             orderBys=new LinkedList<>();
         return orderBys;
+    }
+
+    @Override
+    public void addValue(List list) {
+        if(wheres!=null)
+            wheres.addValue(list);
     }
 }

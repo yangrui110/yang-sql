@@ -34,67 +34,17 @@ public class EntityParamParse {
         present = classEntity.isAnnotationPresent(ViewTable.class);
     }
 
-    private EntityJoinTable parseViewEntityTable(Class entity) throws ClassNotFoundException, NoSuchFieldException {
-        EntitySelectSql selectSql = new EntitySelectSql();
-        Field[] fields = entity.getDeclaredFields();
-        boolean present = entity.isAnnotationPresent(ViewTable.class);
-        if(present) {
-            //设置表别名
-            for (Field field : fields) {
-                Class<?> forName = Class.forName(field.getGenericType().getTypeName());
-                if (field.isAnnotationPresent(MainTable.class)) {
-                    //解析出主表
-                    MainTable fieldAnnotation = field.getAnnotation(MainTable.class);
-                    if (forName.isAnnotationPresent(ViewTable.class)) {
-                        EntityJoinTable entityJoinTable = parseViewEntityTable(forName);
-                        selectSql.setTabelName(entityJoinTable);
-                        selectSql.setTableAlias(fieldAnnotation.tableAlias());
-                    } else {
-                        EntitySimpleJoinTable joinTable = new EntitySimpleJoinTable();
-                        joinTable.setTableAlias(fieldAnnotation.tableAlias());
-                        if (forName.isAnnotationPresent(TableName.class))
-                            joinTable.setTableName(forName.getAnnotation(TableName.class).value());
-                        else joinTable.setTableName(StringUtils.camel2Underline(forName.getSimpleName()));
-                        //设置表名
-                        selectSql.setTabelName(joinTable);
-                    }
-                }
-            }
-        }else {
-            String tableName= ReflectEntity.reflectTableName(entity);
-            EntitySimpleJoinTable joinTable = new EntitySimpleJoinTable();
-            joinTable.setTableName(tableName);
-            selectSql.setTabelName(joinTable);
-        }
-        if(present) {
-            List<EntityColumn> viewTableColumns = ReflectEntity.getViewTableColumns(entity);
-            selectSql.getColumns().addAll(viewTableColumns);
-        }else {
-            List<EntityColumn> viewTableColumns = ReflectEntity.reflectSelectColumns(entity);
-            selectSql.getColumns().addAll(viewTableColumns);
-        }
-        //获取到关联条件
-        List<EntitySimpleJoin> relationJoins = ReflectEntity.getRelationJoins(entity);
-        selectSql.setJoins(relationJoins);
-        //设置条件
-        EntityCondition entityCondition = ReflectEntity.collectDefaultCondition(entity);
-        selectSql.setWheres(entityCondition);
-        //设置排序
-        List<EntityOrderBy> orderByList = ReflectEntity.collectDefaultOrderBy(entity);
-        selectSql.setOrderBys(orderByList);
-        return selectSql;
-    }
 
 
     public EntitySelectSql parseToEntitySelectSql() throws ClassNotFoundException, NoSuchFieldException {
         //1.构造实体条件
-        selectSql = (EntitySelectSql) parseViewEntityTable(classEntity);
+        selectSql = (EntitySelectSql) EntityParseUtil.parseViewEntityTable(classEntity);
 
         JSONObject condition= params.getCondition();
         EntityCondition entityCondition = ReflectEntity.collectDefaultCondition(classEntity);
         if(condition !=null&&condition.keySet().size()>0){
-            Map one = EntityParseUtil.excludeNoExistColumn(condition, selectSql.getColumns());
-            JSONObject selectCondition = EntityParseUtil.saveConditionToSelectCondition(one);
+            JSONObject selectCondition = EntityParseUtil.saveConditionToSelectCondition(condition);
+            //EntityParseUtil.excludeNoExistColumn(selectCondition, selectSql.getColumns());
             if(selectCondition!=null)
                 condition=selectCondition;
             EntityCondition condition1 = parserParamCondition(condition);
@@ -110,23 +60,6 @@ public class EntityParamParse {
         }
         List<EntityOrderBy> orderBy=params.getOrderBy();
         selectSql.getOrderBys().addAll(orderBy);
-        /*
-        //2.确定查询的数据库表
-        String tableName= ReflectEntity.reflectTableName(classEntity);
-        EntitySimpleJoinTable joinTable = new EntitySimpleJoinTable();
-        joinTable.setTableName(tableName);
-        selectSql.setTabelName(joinTable);
-        //3.确定查询的列名
-        List<EntityColumn> columnList=ReflectEntity.reflectSelectColumns(classEntity);
-        selectSql.setColumns(columnList);
-        //4.确定排序
-        List<EntityOrderBy> orderBy=params.getOrderBy();
-        if(orderBy !=null) {
-            for (EntityOrderBy order : orderBy) {
-                order.setColumn(ReflectEntity.getTableField(classEntity, order.getColumn()));
-            }
-        }
-        selectSql.setOrderBys(params.getOrderBy());*/
         return selectSql;
     }
     private EntityCondition parserParamCondition(Map condition) throws NoSuchFieldException, ClassNotFoundException {
@@ -176,7 +109,7 @@ public class EntityParamParse {
                 condition = new EntityConditionColumn();
                 for(EntityColumn conditionColumn:selectSql.getColumns()){
                     String alias = StringUtils.isEmpty(conditionColumn.getAliasColumn())?conditionColumn.getAliasColumn():conditionColumn.getFieldName();
-                    if(alias.equals(os)){
+                    if(alias.equalsIgnoreCase((String) os)){
                         ((EntityConditionColumn) condition).setColumn(conditionColumn.getOrignColumn());
                         ((EntityConditionColumn) condition).setTableAlias(conditionColumn.getTableAlias());
                     }

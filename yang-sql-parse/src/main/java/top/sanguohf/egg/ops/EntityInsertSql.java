@@ -35,6 +35,7 @@ public class EntityInsertSql extends AbstractEntityJoinTable {
         return toSql(connection);
     }
 
+    @Override
     public String sqlOne(boolean isPrepare){
         StringBuilder builder = new StringBuilder();
         builder.append(" insert into ")
@@ -59,5 +60,12 @@ public class EntityInsertSql extends AbstractEntityJoinTable {
         }
         builder.append(")");
         return builder.toString();
+    }
+
+    @Override
+    public void addValue(List list) {
+        for(EntityInsert insert:insertList){
+            insert.addValue(list);
+        }
     }
 }

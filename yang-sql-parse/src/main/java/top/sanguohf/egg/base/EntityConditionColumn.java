@@ -12,14 +12,19 @@ public class EntityConditionColumn implements EntityCondition {
     private String tableAlias;
 
     public String toSql() {
+        return sqlOne(false);
+    }
+
+    public String toSql(DbType dbType) {
+        return toSql();
+    }
+
+    @Override
+    public String sqlOne(boolean isPrepare) {
         StringBuilder builder=new StringBuilder();
         if(!StringUtils.isEmpty(tableAlias))
             builder.append(tableAlias).append(".");
         builder.append(column);
         return builder.toString();
-    }
-
-    public String toSql(DbType dbType) {
-        return toSql();
     }
 }

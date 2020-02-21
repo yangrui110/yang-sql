@@ -45,9 +45,13 @@ public class CommonServiceImpl implements CommonService {
         CommonPageResp resp=new CommonPageResp<>();
         if(count!=0){
             //获取到数据集
-            String toPageSql = new EntityPageSql(selectSql).toPageSql(page.getPage(), page.getSize(),dbType.getDbType());
-            System.out.println("查询语句："+toPageSql);
-            List<Map<String, Object>> querys = jdbcTemplate.queryForList(toPageSql);
+            EntityPageSql entityPageSql = new EntityPageSql(selectSql);
+            String toPageSql = entityPageSql.toPageSql(page.getPage(), page.getSize(),true,dbType.getDbType());
+            LinkedList objects = new LinkedList<>();
+            entityPageSql.addValue(page.getPage(),page.getSize(),dbType.getDbType(),objects);
+            List<Map<String, Object>> querys = jdbcTemplate.queryForList(toPageSql,objects.toArray());
+            System.out.println("查询语句Page："+toPageSql);
+            System.out.println(objects);
             resp.setData(querys);
         }
         resp.setCount(count);
@@ -58,18 +62,25 @@ public class CommonServiceImpl implements CommonService {
     public List findList(EntityParams params) throws ClassNotFoundException, NoSuchFieldException, IOException {
         EntityParams params1 = inteceptor(params);
         EntitySelectSql selectSql = new EntityParamParse(params1).parseToEntitySelectSql();
-        System.out.println("查询语句："+selectSql.toSql());
-        List<Map<String, Object>> query = jdbcTemplate.queryForList(selectSql.toSql(dbType.getDbType()));
-        return query;
+        String sqlOne = selectSql.sqlOne(true);
+        System.out.println(sqlOne);
+        LinkedList objects = new LinkedList<>();
+        selectSql.addValue(objects);
+        List<Map<String, Object>> mapList = jdbcTemplate.queryForList(sqlOne, objects.toArray());
+        return mapList;
     }
 
     @Override
     public long count(EntityParams params) throws ClassNotFoundException, NoSuchFieldException, IOException {
         EntityParams params1 = inteceptor(params);
         EntitySelectSql selectSql = new EntityParamParse(params1).parseToEntitySelectSql();
-        String countSql = new EntityPageSql(selectSql).toCountSql(dbType.getDbType());
-        Map<String,Object> counts = jdbcTemplate.queryForMap(countSql);
+        EntityPageSql entityPageSql = new EntityPageSql(selectSql);
+        String countSql = entityPageSql.toCountSql(dbType.getDbType(), true);
+        LinkedList objects = new LinkedList<>();
+        entityPageSql.addCountValue(objects);
+        Map<String,Object> counts = jdbcTemplate.queryForMap(countSql,objects.toArray());
         System.out.println("查询语句:"+countSql);
+        System.out.println(objects);
         long count=Long.parseLong(""+counts.get("__total__"));
         return count;
     }
@@ -78,14 +89,10 @@ public class CommonServiceImpl implements CommonService {
     public void insert(EntityParams paramData) throws ClassNotFoundException, NoSuchFieldException, IOException {
         EntityParams params1 = inteceptor(paramData);
         EntityInsertSql insertSql = new EntityParamParse(params1).parseToEntityInertSql();
-        jdbcTemplate.update(new PreparedStatementCreator() {
-            @Override
-            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                PreparedStatement statement = insertSql.toSql(connection);
-                return statement;
-            }
-        });
-//        jdbcTemplate.execute(insertSql.toSql(dbType.getDbType()));
+        String sqlOne = insertSql.sqlOne(true);
+        LinkedList objects = new LinkedList<>();
+        insertSql.addValue(objects);
+        jdbcTemplate.update(sqlOne,objects.toArray());
     }
 
     @Transactional
@@ -93,26 +100,21 @@ public class CommonServiceImpl implements CommonService {
     public void update(EntityParams paramsData) throws ClassNotFoundException, NoSuchFieldException, IOException {
         EntityParams params1 = inteceptor(paramsData);
         EntityUpdateSql updateSql = new EntityParamParse(params1).parseToEntityUpdateSql();
-        jdbcTemplate.update(new PreparedStatementCreator() {
-            @Override
-            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                PreparedStatement statement = updateSql.toSql(connection);
-                return statement;
-            }
-        });
+        String sqlOne = updateSql.sqlOne(true);
+        LinkedList objects = new LinkedList<>();
+        updateSql.addValue(objects);
+        jdbcTemplate.update(sqlOne,objects.toArray());
+
     }
 
     @Override
     public void delete(EntityParams paramsData) throws ClassNotFoundException, NoSuchFieldException, IOException {
         EntityParams params1 = inteceptor(paramsData);
         EntityDeleteSql deleteSql = new EntityParamParse(params1).parseToEntityDeleteSql();
-        jdbcTemplate.update(new PreparedStatementCreator() {
-            @Override
-            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                PreparedStatement statement = deleteSql.toSql(connection);
-                return statement;
-            }
-        });
+        String sqlOne = deleteSql.sqlOne(true);
+        LinkedList objects = new LinkedList<>();
+        deleteSql.addValue(objects);
+        jdbcTemplate.update(sqlOne,objects.toArray());
     }
 
     @Transactional
@@ -200,7 +202,7 @@ public class CommonServiceImpl implements CommonService {
                 values.add(objects);
             }
             //获取到预加载的sql语句
-            String sqlOne = first.one(true);
+            String sqlOne = first.sqlOne(true);
             System.out.println(sqlOne);
             jdbcTemplate.batchUpdate(sqlOne,values);
         }
@@ -235,7 +237,7 @@ public class CommonServiceImpl implements CommonService {
                 values.add(collectSortValue(list,insertList));
             }
             //获取到预加载的sql语句
-            String sqlOne = first.one(true);
+            String sqlOne = first.sqlOne(true);
             jdbcTemplate.batchUpdate(sqlOne,values);
         }
     }

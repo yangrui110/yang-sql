@@ -6,6 +6,7 @@ import top.sanguohf.egg.constant.DbType;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 
 public interface SqlParse {
 
@@ -15,4 +16,8 @@ public interface SqlParse {
     default PreparedStatement toSql(Connection connection) throws SQLException {return null;}
 
     default PreparedStatement toSql(Connection connection,DbType dbType) throws SQLException {return null;}
+
+    default String sqlOne(boolean isPrepare){return "";}
+
+    default void addValue(List list){}
 }
