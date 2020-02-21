@@ -115,7 +115,7 @@ public class StringUtils {
                     Class<?> aClass = Class.forName(one + "." + group);
                     EntityJoinTable entityJoinTable = EntityParseUtil.parseViewEntityTable(aClass);
                     exist = true;
-                    stringBuilder.append("(").append(entityJoinTable.toSql()).append(")");
+                    stringBuilder.append("(").append(entityJoinTable.toSql(SqlConfigProperties.getInstance().getDbType())).append(")");
                 } catch (ClassNotFoundException e) {
                 }
             }
