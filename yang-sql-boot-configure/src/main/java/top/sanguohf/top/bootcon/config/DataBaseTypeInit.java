@@ -3,6 +3,7 @@ package top.sanguohf.top.bootcon.config;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 import top.sanguohf.egg.constant.DbType;
+import top.sanguohf.egg.constant.SqlConfigProperties;
 
 import javax.sql.DataSource;
 import java.sql.DatabaseMetaData;
@@ -26,6 +27,7 @@ public class DataBaseTypeInit {
         }else if(("Oracle").equals(dataBaseType)){
             this.dbType=DbType.ORACLE;
         }
+        SqlConfigProperties.getInstance().setDbType(this.dbType);
     }
 
 }

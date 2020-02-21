@@ -1,7 +1,6 @@
 package top.sanguohf.egg.test;
 
 import com.alibaba.fastjson.JSONObject;
-import com.mysql.cj.jdbc.Blob;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +57,6 @@ public class TestOne {
         Page page = new Page();
         page.setPage(1);page.setSize(10);*/
         List list = commonService.findList(params);
-        System.out.println(list);
     }
     //无条件查询
     @Test

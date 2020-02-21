@@ -1,7 +1,7 @@
 package top.sanguohf.top.bootcon.config;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import top.sanguohf.egg.constant.ScanPackage;
+import top.sanguohf.egg.constant.SqlConfigProperties;
 import top.sanguohf.top.bootcon.annotation.ScanEntity;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -39,7 +39,7 @@ public class ScanEntityRegister implements ImportBeanDefinitionRegistrar {
 
         builder.addPropertyValue("basePackage", StringUtils.collectionToCommaDelimitedString(basePackages));
         String[] strings = new String[basePackages.size()];
-        ScanPackage.setPackages(basePackages.toArray(strings));
+        SqlConfigProperties.getInstance().setPackages(basePackages.toArray(strings));
         registry.registerBeanDefinition(beanName, builder.getBeanDefinition());
     }
 

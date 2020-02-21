@@ -156,7 +156,6 @@ public class EntityParamParse {
         updateSql.setTableName(ReflectEntity.reflectTableName(classEntity));
         updateSql.setUpdates(inserts);
         updateSql.setWheres(ReflectEntity.reflectPrimaryKeys(classEntity,os));
-        System.out.println(updateSql.toSql());
         return updateSql;
     }
 
@@ -166,7 +165,6 @@ public class EntityParamParse {
         deleteSql.setTableName(ReflectEntity.reflectTableName(classEntity));
         JSONObject condition= params.getCondition();
         deleteSql.setWheres(ReflectEntity.reflectPrimaryKeys(classEntity,condition));
-        System.out.println(deleteSql.toSql());
         return deleteSql;
     }
 }

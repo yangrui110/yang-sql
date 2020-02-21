@@ -5,6 +5,7 @@ import top.sanguohf.egg.base.EntityInsert;
 import top.sanguohf.egg.ops.*;
 import top.sanguohf.egg.param.EntityParamParse;
 import top.sanguohf.egg.param.EntityParams;
+import top.sanguohf.egg.util.ConsoleSqlUtil;
 import top.sanguohf.top.bootcon.config.DataBaseTypeInit;
 import top.sanguohf.top.bootcon.config.ScanEntityConfigure;
 import top.sanguohf.top.bootcon.page.Page;
@@ -50,8 +51,9 @@ public class CommonServiceImpl implements CommonService {
             LinkedList objects = new LinkedList<>();
             entityPageSql.addValue(page.getPage(),page.getSize(),dbType.getDbType(),objects);
             List<Map<String, Object>> querys = jdbcTemplate.queryForList(toPageSql,objects.toArray());
-            System.out.println("查询语句Page："+toPageSql);
-            System.out.println(objects);
+            ConsoleSqlUtil.console(toPageSql);
+            ConsoleSqlUtil.consoleParam(objects);
+            ConsoleSqlUtil.consoleResult(querys);
             resp.setData(querys);
         }
         resp.setCount(count);
@@ -67,6 +69,9 @@ public class CommonServiceImpl implements CommonService {
         LinkedList objects = new LinkedList<>();
         selectSql.addValue(objects);
         List<Map<String, Object>> mapList = jdbcTemplate.queryForList(sqlOne, objects.toArray());
+        ConsoleSqlUtil.console(sqlOne);
+        ConsoleSqlUtil.consoleParam(objects);
+        ConsoleSqlUtil.consoleResult(mapList);
         return mapList;
     }
 
@@ -79,8 +84,9 @@ public class CommonServiceImpl implements CommonService {
         LinkedList objects = new LinkedList<>();
         entityPageSql.addCountValue(objects);
         Map<String,Object> counts = jdbcTemplate.queryForMap(countSql,objects.toArray());
-        System.out.println("查询语句:"+countSql);
-        System.out.println(objects);
+        ConsoleSqlUtil.console(countSql);
+        ConsoleSqlUtil.consoleParam(objects);
+        ConsoleSqlUtil.consoleResult(counts);
         long count=Long.parseLong(""+counts.get("__total__"));
         return count;
     }
@@ -92,6 +98,8 @@ public class CommonServiceImpl implements CommonService {
         String sqlOne = insertSql.sqlOne(true);
         LinkedList objects = new LinkedList<>();
         insertSql.addValue(objects);
+        ConsoleSqlUtil.console(sqlOne);
+        ConsoleSqlUtil.consoleParam(objects);
         jdbcTemplate.update(sqlOne,objects.toArray());
     }
 
@@ -103,6 +111,8 @@ public class CommonServiceImpl implements CommonService {
         String sqlOne = updateSql.sqlOne(true);
         LinkedList objects = new LinkedList<>();
         updateSql.addValue(objects);
+        ConsoleSqlUtil.console(sqlOne);
+        ConsoleSqlUtil.consoleParam(objects);
         jdbcTemplate.update(sqlOne,objects.toArray());
 
     }
@@ -114,6 +124,8 @@ public class CommonServiceImpl implements CommonService {
         String sqlOne = deleteSql.sqlOne(true);
         LinkedList objects = new LinkedList<>();
         deleteSql.addValue(objects);
+        ConsoleSqlUtil.console(sqlOne);
+        ConsoleSqlUtil.consoleParam(objects);
         jdbcTemplate.update(sqlOne,objects.toArray());
     }
 
@@ -148,6 +160,8 @@ public class CommonServiceImpl implements CommonService {
             }
             //获取到预加载的sql语句
             String sqlOne = first.sqlOne(true);
+            ConsoleSqlUtil.console(sqlOne);
+            ConsoleSqlUtil.consoleParams(values);
             jdbcTemplate.batchUpdate(sqlOne,values);
         }
     }
@@ -203,7 +217,8 @@ public class CommonServiceImpl implements CommonService {
             }
             //获取到预加载的sql语句
             String sqlOne = first.sqlOne(true);
-            System.out.println(sqlOne);
+            ConsoleSqlUtil.console(sqlOne);
+            ConsoleSqlUtil.consoleParams(values);
             jdbcTemplate.batchUpdate(sqlOne,values);
         }
     }
@@ -238,6 +253,8 @@ public class CommonServiceImpl implements CommonService {
             }
             //获取到预加载的sql语句
             String sqlOne = first.sqlOne(true);
+            ConsoleSqlUtil.console(sqlOne);
+            ConsoleSqlUtil.consoleParams(values);
             jdbcTemplate.batchUpdate(sqlOne,values);
         }
     }

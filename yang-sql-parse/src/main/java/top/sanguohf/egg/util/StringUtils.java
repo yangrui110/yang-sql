@@ -1,6 +1,6 @@
 package top.sanguohf.egg.util;
 
-import top.sanguohf.egg.constant.ScanPackage;
+import top.sanguohf.egg.constant.SqlConfigProperties;
 import top.sanguohf.egg.ops.EntityJoinTable;
 
 import java.util.Map;
@@ -103,7 +103,7 @@ public class StringUtils {
         Pattern compile = Pattern.compile(pattern);
         Matcher matcher = compile.matcher(condition);
         StringBuffer buffer = new StringBuffer();
-        String[] packages = ScanPackage.getPackage();
+        String[] packages = SqlConfigProperties.getInstance().getPackage();
         StringBuilder stringBuilder = new StringBuilder();
         while (matcher.find()){
             String group = matcher.group();
