@@ -1,5 +1,5 @@
 # yang-sql SQL转换器  
-功能详解：实现了对数据库表通用的增删改查，以及批量的增删改，仅是对单表。目前数据库做了sql server和MySQL的适配，
+功能详解：实现了对数据库表通用的增删改查，以及批量的增删改，囊括了关联查询以及子查询。目前数据库做了sql server和MySQL的适配，
 对于oracle有实现，但是并未做相关测试，至于其它数据库系统默认采用的是MySQL的语法。有不正确的地方再行修改。
 欢迎加入QQ群：623337780，获取帮助和提出宝贵建议
 csdn教程地址：[教程一](https://blog.csdn.net/yr_sky/article/details/104335020) [教程二](https://blog.csdn.net/yr_sky/article/details/104402341)
