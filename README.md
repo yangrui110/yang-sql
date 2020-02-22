@@ -3,13 +3,14 @@
 对于oracle有实现，但是并未做相关测试，至于其它数据库系统默认采用的是MySQL的语法。有不正确的地方再行修改。
 欢迎加入QQ群：623337780，获取帮助和提出宝贵建议
 csdn教程地址：[教程一](https://blog.csdn.net/yr_sky/article/details/104335020) [教程二](https://blog.csdn.net/yr_sky/article/details/104402341)
+[教程总览](https://blog.csdn.net/yr_sky/article/details/104441531)
 ### 1. 安装
 对于SpringBoot项目，可以使用完整的功能,引入Maven
 ```xml
 <dependency>
     <groupId>top.sanguohf.egg</groupId>
     <artifactId>yang-sql-starter</artifactId>
-    <version>1.0.6-release</version>
+    <version>1.0.7-release</version>
 </dependency>
 ```
 ### 2. 使用

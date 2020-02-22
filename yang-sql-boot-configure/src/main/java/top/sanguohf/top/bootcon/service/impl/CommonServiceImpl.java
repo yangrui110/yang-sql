@@ -1,6 +1,5 @@
 package top.sanguohf.top.bootcon.service.impl;
 
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import top.sanguohf.egg.base.EntityInsert;
 import top.sanguohf.egg.ops.*;
 import top.sanguohf.egg.param.EntityParamParse;
@@ -19,9 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;

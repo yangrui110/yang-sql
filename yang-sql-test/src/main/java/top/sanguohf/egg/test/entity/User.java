@@ -14,9 +14,8 @@ public class User {
     @Id
     @Field("user_name")
     private String userName;
-    @IgnoreSelectReback
     private String password;
     protected String id;
+    @IgnoreSelectReback
     private BigDecimal price;
-
 }

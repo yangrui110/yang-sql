@@ -1,6 +1,5 @@
 package top.sanguohf.egg.reflect;
 
-import top.sanguohf.egg.annotation.Condition;
 import top.sanguohf.egg.annotation.MainTable;
 import top.sanguohf.egg.annotation.ReferTable;
 import top.sanguohf.egg.annotation.ViewTable;
