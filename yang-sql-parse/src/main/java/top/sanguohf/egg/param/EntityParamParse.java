@@ -1,18 +1,16 @@
 package top.sanguohf.egg.param;
 
 import com.alibaba.fastjson.JSONObject;
-import top.sanguohf.egg.annotation.MainTable;
-import top.sanguohf.egg.annotation.ReferTable;
-import top.sanguohf.egg.annotation.TableName;
 import top.sanguohf.egg.annotation.ViewTable;
 import top.sanguohf.egg.base.*;
-import top.sanguohf.egg.ops.*;
+import top.sanguohf.egg.ops.EntityDeleteSql;
+import top.sanguohf.egg.ops.EntityInsertSql;
+import top.sanguohf.egg.ops.EntitySelectSql;
+import top.sanguohf.egg.ops.EntityUpdateSql;
 import top.sanguohf.egg.reflect.ReflectEntity;
 import top.sanguohf.egg.util.EntityParseUtil;
 import top.sanguohf.egg.util.StringUtils;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;

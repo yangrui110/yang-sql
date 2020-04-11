@@ -7,8 +7,9 @@ import top.sanguohf.egg.constant.ValueType;
 import top.sanguohf.egg.ops.EntitySelectSql;
 import top.sanguohf.egg.util.StringUtils;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,7 +35,7 @@ public class ReflectEntity {
     public static List<EntityInsert> reflectPrimaryKeys(Class entity, Map<String,Object> columns) throws NoSuchFieldException, ClassNotFoundException {
         LinkedList<EntityInsert> ids = new LinkedList<>();
         for(String key:columns.keySet()){
-            Field field = entity.getDeclaredField(key);
+            Field field = getFieldByName(entity,key);
             if(field.isAnnotationPresent(Id.class)){
                 EntityInsert insert = new EntityInsert();
                 String tableField = getTableField(entity, key);
@@ -64,8 +65,8 @@ public class ReflectEntity {
     //获取到所有待查询的列
     public static List<EntityColumn> reflectSelectColumns(Class entity){
         List<EntityColumn> columnList = new LinkedList<>();
-        Field[] field = entity.getDeclaredFields();
-        for(Field field1: field){
+        List<Field> fields = getFields(entity);
+        for(Field field1: fields){
             top.sanguohf.egg.annotation.Field fs=field1.getAnnotation(top.sanguohf.egg.annotation.Field.class);
             IgnoreSelectReback ignore=field1.getAnnotation(IgnoreSelectReback.class);
             if(ignore==null||!ignore.value()) {
@@ -90,7 +91,7 @@ public class ReflectEntity {
 
     public static String getTableField(Class entity,String fieldName) throws NoSuchFieldException, ClassNotFoundException {
         if(!entity.isAnnotationPresent(ViewTable.class)) {
-            Field field = entity.getDeclaredField(fieldName);
+            Field field = getFieldByName(entity,fieldName);
             top.sanguohf.egg.annotation.Field fieldClass = field.getAnnotation(top.sanguohf.egg.annotation.Field.class);
             if (fieldClass != null) {
                 return StringUtils.isEmpty(fieldClass.value())?fieldName:fieldClass.value();
@@ -116,7 +117,7 @@ public class ReflectEntity {
      * 收集到实体类上的列默认值
      * */
     public static EntityCondition collectDefaultCondition(Class entity) throws NoSuchFieldException, ClassNotFoundException {
-        Field[] fields = entity.getDeclaredFields();
+        List<Field> fields = getFields(entity);
         EntityListCondition condition = new EntityListCondition();
         List<EntityConditionDom> conditions = new LinkedList<>();
         for(Field field: fields){
@@ -172,7 +173,7 @@ public class ReflectEntity {
      * 收集到待排序的字段
      * */
     public static List<EntityOrderBy> collectDefaultOrderBy(Class entity) throws NoSuchFieldException, ClassNotFoundException {
-        Field[] fields = entity.getDeclaredFields();
+        List<Field> fields = getFields(entity);
         LinkedList<EntityOrderBy> list = new LinkedList<>();
         for(Field field:fields){
             if(field.isAnnotationPresent(OrderBy.class)){
@@ -246,7 +247,7 @@ public class ReflectEntity {
     }
     //获取到视图表需要查询出的列
     public static List<EntityColumn> getViewTableColumns(Class viewEntity) throws ClassNotFoundException, NoSuchFieldException {
-        Field[] fields = viewEntity.getDeclaredFields();
+        List<Field> fields = getFields(viewEntity);
         LinkedList<EntityColumn> totalResult = new LinkedList<>();
         for(Field field:fields){
             if(field.isAnnotationPresent(ReferTable.class)){
@@ -282,7 +283,7 @@ public class ReflectEntity {
     //获取到关联条件
     public static List<EntitySimpleJoin> getRelationJoins(Class viewEntity) throws ClassNotFoundException, NoSuchFieldException {
         if(viewEntity.isAnnotationPresent(ViewTable.class)) {
-            Field[] fields = viewEntity.getDeclaredFields();
+            List<Field> fields = getFields(viewEntity);
             //1.收集到别名和类名的对应
             Map<String, Class> map = new HashMap<>();
             LinkedList<String> list = new LinkedList<>();
@@ -329,5 +330,35 @@ public class ReflectEntity {
             return Integer.parseInt(value);
         }
         return value;
+    }
+
+    public static List<Field> getFields(Type superclass){
+        List<Field> objects = new LinkedList<>();
+        try {
+            while (superclass!=null) {
+                Class<?> forName = Class.forName(superclass.getTypeName());
+                Field[] declaredFields = forName.getDeclaredFields();
+                superclass = forName.getGenericSuperclass();
+                for(Field f:declaredFields) {
+                    //排除掉static，final
+                    int modifiers = f.getModifiers();
+                    if (!Modifier.isStatic(modifiers)&&!Modifier.isFinal(modifiers))
+                        objects.add(f);
+                }
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return objects;
+    }
+
+    public static Field getFieldByName(Type type,String name) throws NoSuchFieldException {
+        List<Field> fields = getFields(type);
+        for(Field field:fields){
+            if(field.getName().equalsIgnoreCase(name)){
+                return field;
+            }
+        }
+        throw new NoSuchFieldException();
     }
 }

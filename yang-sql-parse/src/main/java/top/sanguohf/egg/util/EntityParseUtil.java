@@ -115,7 +115,7 @@ public class EntityParseUtil {
 
     public static EntityJoinTable parseViewEntityTable(Class entity) throws ClassNotFoundException, NoSuchFieldException {
         EntitySelectSql selectSql = new EntitySelectSql();
-        Field[] fields = entity.getDeclaredFields();
+        List<Field> fields = ReflectEntity.getFields(entity);
         boolean present = entity.isAnnotationPresent(ViewTable.class);
         if(present) {
             //设置表别名

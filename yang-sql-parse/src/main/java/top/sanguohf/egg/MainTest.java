@@ -101,7 +101,7 @@ public class MainTest {
         //System.out.println(selectSql.toSql());
     }
 
-    public static void main(String[] args) throws ClassNotFoundException {
+    public static void main2(String[] args) throws ClassNotFoundException {
         String content = "useriiii.userName=1 and user.password = 2 and user.id=3 and user.ps>0 and user.id > [ones] and user.po < [pj]";
         String patter = "(?<=user\\.).*?(?==| |>|<)";
         Pattern compile = Pattern.compile(patter);
@@ -121,7 +121,7 @@ public class MainTest {
         while (matcher2.find()){
             System.out.println(matcher2.group());
         }
-        Class<?> forName = Class.forName("top.sanguohf.egg.reflect.User");
+        Class<?> forName = Class.forName("top.sanguohf.egg.reflect.SubTeacher");
         Field[] fields = forName.getDeclaredFields();
         for(Field field:fields){
             System.out.println(field.getGenericType().getTypeName());
@@ -129,9 +129,10 @@ public class MainTest {
         //System.out.println(forName.getName());
     }
 
-    public static void mainl(String[] args) throws ClassNotFoundException, NoSuchFieldException {
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchFieldException {
         EntityParams entityParams = new EntityParams();
-        entityParams.setTableClassName("top.sanguohf.egg.reflect.UserClassesView");
+        Class<?> aClass = Class.forName("top.sanguohf.egg.reflect.ThirdTeacher");
+        entityParams.setTableClassName("top.sanguohf.egg.reflect.ThirdTeacher");
         EntitySelectSql selectSql = new EntityParamParse(entityParams).parseToEntitySelectSql();
         System.out.println(selectSql.toSql());
     }

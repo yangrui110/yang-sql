@@ -72,7 +72,7 @@ public class StringUtils {
         Matcher matcher = pattern.matcher(line);
         while (matcher.find()) {
             String word = matcher.group();
-            sb.append(word.toUpperCase());
+            sb.append(word.toLowerCase());
             sb.append(matcher.end() == line.length() ? "" : "_");
         }
         return sb.toString();
