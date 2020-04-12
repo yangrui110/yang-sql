@@ -7,12 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import top.sanguohf.egg.param.EntityParams;
+import top.sanguohf.egg.test.entity.UserOne;
 import top.sanguohf.top.bootcon.page.Page;
 import top.sanguohf.top.bootcon.resp.CommonPageResp;
 import top.sanguohf.top.bootcon.service.CommonService;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,10 +62,20 @@ public class TestOne {
     }
     //无条件查询
     @Test
-    public void test1() throws NoSuchFieldException, IOException, ClassNotFoundException {
-        EntityParams params = new EntityParams();
-        params.setTableClassName("UserOne");
-        List list = commonService.findList(params);
+    public void test1() throws Exception {
+        UserOne one = new UserOne();
+        one.setId("1234567");
+        one.setPassword("kkkkk");
+        one.setUserName("王五--1");
+        UserOne one1 = new UserOne();
+        one1.setId("12345678");
+        one1.setPassword("kkkkk");
+        one1.setUserName("王五--1");
+        ArrayList objects = new ArrayList<>();
+        objects.add(one);
+        commonService.batchUpdate(objects);
+        UserOne userOne = new UserOne();
+        List list = commonService.findEntityList(userOne);
         System.out.println(list);
     }
 

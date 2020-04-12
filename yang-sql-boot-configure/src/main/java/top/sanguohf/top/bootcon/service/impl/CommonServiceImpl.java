@@ -16,8 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import top.sanguohf.top.bootcon.util.ParamEntityParseUtil;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -253,6 +255,60 @@ public class CommonServiceImpl implements CommonService {
             ConsoleSqlUtil.consoleParams(values);
             jdbcTemplate.batchUpdate(sqlOne,values);
         }
+    }
+
+    @Override
+    public <T> CommonPageResp<T> findEntityPageList(T data, Page page) throws Exception {
+        EntityParams entityParams = ParamEntityParseUtil.parseToParam(data);
+        return findPageList(entityParams,page);
+    }
+
+    @Override
+    public <T> List findEntityList(T params) throws Exception {
+        EntityParams entityParams = ParamEntityParseUtil.parseToParam(params);
+        return findList(entityParams);
+    }
+
+    @Override
+    public <T> long countEntity(T params) throws Exception {
+        EntityParams entityParams = ParamEntityParseUtil.parseToParam(params);
+        return count(entityParams);
+    }
+
+    @Override
+    public <T> void insertEntity(T paramData) throws Exception {
+        EntityParams entityParams = ParamEntityParseUtil.parseToParam(paramData);
+        insert(entityParams);
+    }
+
+    @Override
+    public <T> void updateEntity(T paramsData) throws Exception {
+        EntityParams entityParams = ParamEntityParseUtil.parseToParam(paramsData);
+        update(entityParams);
+    }
+
+    @Override
+    public <T> void deleteEntity(T paramsData) throws Exception {
+        EntityParams entityParams = ParamEntityParseUtil.parseToParam(paramsData);
+        delete(entityParams);
+    }
+
+    @Override
+    public <T> void batchEntityInsert(List<T> params) throws IOException, IllegalAccessException {
+        ArrayList<EntityParams> entityParams = new ArrayList<>();
+        for(T data:params){
+            entityParams.add(ParamEntityParseUtil.parseToParam(data));
+        }
+        batchInsert(entityParams);
+    }
+
+    @Override
+    public <T> void batchEntityUpdate(List<T> params) throws IOException, IllegalAccessException {
+        ArrayList<EntityParams> entityParams = new ArrayList<>();
+        for(T data:params){
+            entityParams.add(ParamEntityParseUtil.parseToParam(data));
+        }
+        batchUpdate(entityParams);
     }
 
     private EntityParams inteceptor(EntityParams params) throws IOException {

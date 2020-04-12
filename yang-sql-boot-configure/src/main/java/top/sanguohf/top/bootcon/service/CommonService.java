@@ -35,4 +35,26 @@ public interface CommonService {
     /** @param params
      * */
     void batchDelete(List<EntityParams> params) throws IOException;
+
+    <T> CommonPageResp<T> findEntityPageList(T data, Page page) throws Exception;
+
+    <T> List findEntityList(T params) throws Exception;
+    /** @param params
+     *  */
+    <T> long countEntity(T params) throws Exception;
+    /** @param paramData
+     * */
+    <T> void insertEntity(T paramData) throws Exception;
+    /** @param paramsData
+     * */
+    <T> void updateEntity(T paramsData) throws Exception;
+    /** @param paramsData
+     **/
+    <T> void deleteEntity(T paramsData) throws Exception;
+    /** @param params
+     * */
+    <T> void batchEntityInsert(List<T> params) throws IOException, IllegalAccessException;
+    /** @param params
+     *  */
+    <T> void batchEntityUpdate(List<T> params) throws IOException, IllegalAccessException;
 }
