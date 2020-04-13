@@ -1,6 +1,7 @@
 package top.sanguohf.top.bootcon.service.impl;
 
-import org.springframework.beans.BeanUtils;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -10,6 +11,7 @@ import top.sanguohf.egg.base.EntityInsert;
 import top.sanguohf.egg.ops.*;
 import top.sanguohf.egg.param.EntityParamParse;
 import top.sanguohf.egg.param.EntityParams;
+import top.sanguohf.egg.reflect.ReflectEntity;
 import top.sanguohf.egg.util.ConsoleSqlUtil;
 import top.sanguohf.top.bootcon.config.DataBaseTypeInit;
 import top.sanguohf.top.bootcon.config.ScanEntityConfigure;
@@ -22,13 +24,12 @@ import top.sanguohf.top.bootcon.util.ParamEntityParseUtil;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CommonServiceImpl implements CommonService {
@@ -45,7 +46,7 @@ public class CommonServiceImpl implements CommonService {
     DataSource dataSource;
 
     @Override
-    public CommonPageResp findPageList(EntityParams params, Page page) throws ClassNotFoundException, NoSuchFieldException, IOException {
+    public CommonPageResp findPageList(EntityParams params, Page page) throws ClassNotFoundException, NoSuchFieldException, IOException, InvocationTargetException, IllegalAccessException {
         EntityParams params1 = inteceptor(params);
         EntitySelectSql selectSql = new EntityParamParse(params1).parseToEntitySelectSql();
         long count=count(params);
@@ -67,7 +68,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public List findList(EntityParams params) throws ClassNotFoundException, NoSuchFieldException, IOException {
+    public List findList(EntityParams params) throws ClassNotFoundException, NoSuchFieldException, IOException, InvocationTargetException, IllegalAccessException {
         EntityParams params1 = inteceptor(params);
         EntitySelectSql selectSql = new EntityParamParse(params1).parseToEntitySelectSql();
         String sqlOne = selectSql.sqlOne(true);
@@ -81,15 +82,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public List findListByPrimaryKeys(List<EntityParams> params) throws ClassNotFoundException, NoSuchFieldException, IOException {
-        for(EntityParams params1:params){
-
-        }
-        return null;
-    }
-
-    @Override
-    public long count(EntityParams params) throws ClassNotFoundException, NoSuchFieldException, IOException {
+    public long count(EntityParams params) throws ClassNotFoundException, NoSuchFieldException, IOException, InvocationTargetException, IllegalAccessException {
         EntityParams params1 = inteceptor(params);
         EntitySelectSql selectSql = new EntityParamParse(params1).parseToEntitySelectSql();
         EntityPageSql entityPageSql = new EntityPageSql(selectSql);
@@ -105,7 +98,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public void insert(EntityParams paramData) throws ClassNotFoundException, NoSuchFieldException, IOException {
+    public void insert(EntityParams paramData) throws ClassNotFoundException, NoSuchFieldException, IOException, InvocationTargetException, IllegalAccessException {
         EntityParams params1 = inteceptor(paramData);
         EntityInsertSql insertSql = new EntityParamParse(params1).parseToEntityInertSql();
         String sqlOne = insertSql.sqlOne(true);
@@ -118,7 +111,7 @@ public class CommonServiceImpl implements CommonService {
 
     @Transactional
     @Override
-    public void update(EntityParams paramsData) throws ClassNotFoundException, NoSuchFieldException, IOException {
+    public void update(EntityParams paramsData) throws ClassNotFoundException, NoSuchFieldException, IOException, InvocationTargetException, IllegalAccessException {
         EntityParams params1 = inteceptor(paramsData);
         EntityUpdateSql updateSql = new EntityParamParse(params1).parseToEntityUpdateSql();
         String sqlOne = updateSql.sqlOne(true);
@@ -131,7 +124,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public void delete(EntityParams paramsData) throws ClassNotFoundException, NoSuchFieldException, IOException {
+    public void delete(EntityParams paramsData) throws ClassNotFoundException, NoSuchFieldException, IOException, InvocationTargetException, IllegalAccessException {
         EntityParams params1 = inteceptor(paramsData);
         EntityDeleteSql deleteSql = new EntityParamParse(params1).parseToEntityDeleteSql();
         String sqlOne = deleteSql.sqlOne(true);
@@ -144,7 +137,7 @@ public class CommonServiceImpl implements CommonService {
 
     @Transactional
     @Override
-    public void batchInsert(List<EntityParams> params) throws IOException {
+    public void batchInsert(List<EntityParams> params) throws IOException, InvocationTargetException, IllegalAccessException {
         List<EntityParams> entityParams = inteceptorList(params);
         Connection con = null;
         try {
@@ -212,7 +205,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public void batchDelete(List<EntityParams> params) throws IOException {
+    public void batchDelete(List<EntityParams> params) throws IOException, InvocationTargetException, IllegalAccessException {
         List<EntityParams> entityParams = inteceptorList(params);
         Connection con = null;
         try {
@@ -230,11 +223,52 @@ public class CommonServiceImpl implements CommonService {
         }
     }
 
+    /**
+     * 只适配于单个主键
+     * 复合主键，暂时不适用
+     * */
     @Override
-    public void batchSave(List<EntityParams> params) throws IOException {
+    public void batchSave(List<EntityParams> params) throws Exception {
+        List<EntityParams> params2 = inteceptorList(params);
         //1.首先根据主键集合找到所有符合条件的数据
+        List<EntityInsert> arrayList = new LinkedList<>();
+        Class t= null;
+        String primaryKey = "";
+        for(EntityParams params1:params2){
+            t= Class.forName(params1.getTableClassName());
+            List<EntityInsert> entityInserts = ReflectEntity.reflectPrimaryKeys(t, params1.getCondition());
+            arrayList.addAll(entityInserts);
+            primaryKey = entityInserts.get(0).getColumn();
+        }
+        List<Object> collect = arrayList.stream().map(item -> item.getValue()).collect(Collectors.toList());
+        List byPrimaryKeys = findByPrimaryKeys(t, collect);
         //2.根据数据的存在与否，构造出不同的SQL语句
-        //3.执行批量操作，更新数据库
+        Connection con = null;
+        try {
+            con=DataSourceUtils.getConnection(dataSource);
+            con.setAutoCommit(false);
+            for (EntityParams params1 : params2) {
+                boolean exist = false;
+                for(Object os : byPrimaryKeys){
+                    Map one = JSONObject.parseObject(JSONObject.toJSONString(os));
+                    if(one.get(primaryKey).equals(params1.getCondition().getString(primaryKey))){
+                        exist = true;
+                    }
+                }
+                if(exist) {
+                    EntityUpdateSql updateSql = new EntityParamParse(params1).parseToEntityUpdateSql();
+                    executeSql(updateSql, con);
+                }else {
+                    EntityInsertSql updateSql = new EntityParamParse(params1).parseToEntityInertSql();
+                    executeSql(updateSql, con);
+                }
+            }
+            con.commit();
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            DataSourceUtils.releaseConnection(con, dataSource);
+        }
     }
 
     /**
@@ -285,7 +319,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public <T> void batchEntityInsert(List<T> params) throws IOException, IllegalAccessException {
+    public <T> void batchEntityInsert(List<T> params) throws IOException, IllegalAccessException, InvocationTargetException {
         ArrayList<EntityParams> entityParams = new ArrayList<>();
         for(T data:params){
             entityParams.add(ParamEntityParseUtil.parseToParam(data));
@@ -311,21 +345,66 @@ public class CommonServiceImpl implements CommonService {
         batchDelete(entityParams);
     }
 
-    private EntityParams inteceptor(EntityParams params) throws IOException {
+    @Override
+    public <T> T findByPrimaryKey(Class<T> tClass, Object key) throws Exception {
+        EntityParams entityParams = new EntityParams();
+        entityParams.setTableClassName(tClass.getSimpleName());
+        JSONObject hashMap = new JSONObject();
+        List<EntityInsert> inserts = ReflectEntity.reflectPrimaryKeys(tClass, new HashMap<>());
+        EntityInsert insert = inserts.get(0);
+        hashMap.put("left",insert.getColumn());
+        hashMap.put("right",key);
+        hashMap.put("relation","=");
+        entityParams.setCondition(hashMap);
+        List list = findList(entityParams);
+        List<T> parseList = ObjectUtil.parseList(list, tClass);
+        if(parseList.size()>1)
+            throw new RuntimeException("结果数大于2条，最多只能返回一条");
+        if(parseList.size()>0)
+            return parseList.get(0);
+        return null;
+    }
+
+    @Override
+    public <T> List<T> findByPrimaryKeys(Class<T> tClass, List<? extends Object> keys) throws Exception {
+        EntityParams entityParams = new EntityParams();
+        entityParams.setTableClassName(tClass.getSimpleName());
+        JSONObject hashMap = new JSONObject();
+        List<EntityInsert> inserts = ReflectEntity.reflectPrimaryKeys(tClass, new HashMap<>());
+        EntityInsert insert = inserts.get(0);
+        hashMap.put("left",insert.getColumn());
+        hashMap.put("right",keys.toArray());
+        hashMap.put("relation","in");
+        entityParams.setCondition(hashMap);
+        List list = findList(entityParams);
+        List<T> parseList = ObjectUtil.parseList(list, tClass);
+        return parseList;
+    }
+
+    @Override
+    public <T> void batchSaveEntity(List<T> entitys) throws Exception {
+        ArrayList<EntityParams> entityParams = new ArrayList<>();
+        for(T data:entitys){
+            entityParams.add(ParamEntityParseUtil.parseToParam(data));
+        }
+        batchSave(entityParams);
+    }
+
+    private EntityParams inteceptor(EntityParams params) throws IOException, InvocationTargetException, IllegalAccessException {
         EntityParams params1 = new EntityParams();
-        BeanUtils.copyProperties(params,params1);
+        BeanUtils.copyProperties(params1,params);
         String classPackage = ClassInfoUtil.getPackageByRelativeName(params.getTableClassName(),configure.getBasePackage());
         params1.setTableClassName(classPackage);
         return params1;
     }
 
-    private List<EntityParams> inteceptorList(List<EntityParams> prs) throws IOException {
+    private List<EntityParams> inteceptorList(List<EntityParams> prs) throws IOException, InvocationTargetException, IllegalAccessException {
         EntityParams params = prs.get(0);
         LinkedList<EntityParams> list = new LinkedList<>();
         String classPackage = ClassInfoUtil.getPackageByRelativeName(params.getTableClassName(),configure.getBasePackage());
         for(EntityParams pl: prs){
             EntityParams entityParams = new EntityParams();
-            BeanUtils.copyProperties(pl,entityParams);
+            BeanUtils.copyProperties(entityParams,pl);
             entityParams.setTableClassName(classPackage);
             list.add(entityParams);
         }

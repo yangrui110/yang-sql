@@ -13,6 +13,7 @@ import top.sanguohf.top.bootcon.resp.CommonPageResp;
 import top.sanguohf.top.bootcon.service.CommonService;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,7 +29,7 @@ public class TestOne {
 
     //带条件查询
     @Test
-    public void test4() throws NoSuchFieldException, IOException, ClassNotFoundException {
+    public void test4() throws NoSuchFieldException, IOException, ClassNotFoundException, InvocationTargetException, IllegalAccessException {
         EntityParams params = new EntityParams();
         params.setTableClassName("UserOne");
         //设置查询条件
@@ -47,7 +48,7 @@ public class TestOne {
     }
 
     @Test
-    public void test3() throws NoSuchFieldException, IOException, ClassNotFoundException {
+    public void test3() throws NoSuchFieldException, IOException, ClassNotFoundException, InvocationTargetException, IllegalAccessException {
         EntityParams params = new EntityParams();
         params.setTableClassName("UserClassesView");
         //设置查询条件
@@ -68,21 +69,27 @@ public class TestOne {
         one.setPassword("kkkkk");
         one.setUserName("张综上所述--8");
         UserOne one1 = new UserOne();
-        one1.setId("19980999");
+        one1.setId("1998");
         one1.setPassword("jjjjj");
         one1.setUserName("王五--2");
         ArrayList objects = new ArrayList<>();
         objects.add(one);
         objects.add(one1);
-        commonService.batchEntityDelete(objects);
+        commonService.batchSaveEntity(objects);
         UserOne userOne = new UserOne();
         List list = commonService.findEntityList(userOne,UserOne.class);
         System.out.println(list);
+        /*ArrayList<String> list1 = new ArrayList<>();
+        list1.add("111");
+        list1.add("222");
+        list1.add("333");
+        List<UserOne> byPrimaryKeys = commonService.findByPrimaryKeys(UserOne.class, list1);
+        System.out.println(byPrimaryKeys);*/
     }
 
 
     @Test
-    public void test2() throws NoSuchFieldException, IOException, ClassNotFoundException {
+    public void test2() throws NoSuchFieldException, IOException, ClassNotFoundException, InvocationTargetException, IllegalAccessException {
         EntityParams params = new EntityParams();
         params.setTableClassName("UserOne");
         JSONObject con1 = new JSONObject();
@@ -97,7 +104,7 @@ public class TestOne {
         //System.out.println(list);
     }
     @Test
-    public void test5() throws NoSuchFieldException, IOException, ClassNotFoundException {
+    public void test5() throws NoSuchFieldException, IOException, ClassNotFoundException, InvocationTargetException, IllegalAccessException {
         EntityParams params = new EntityParams();
         params.setTableClassName("UserOne");
         JSONObject con1 = new JSONObject();
@@ -113,7 +120,7 @@ public class TestOne {
     }
 
     @Test
-    public void test6() throws NoSuchFieldException, IOException, ClassNotFoundException {
+    public void test6() throws NoSuchFieldException, IOException, ClassNotFoundException, InvocationTargetException, IllegalAccessException {
         EntityParams params = new EntityParams();
         params.setTableClassName("Classes");
         /*JSONObject con1 = new JSONObject();

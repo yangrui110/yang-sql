@@ -32,12 +32,38 @@ public class EntityConditionValue implements EntityCondition {
             builder.append(column);
             if (column instanceof String)
                 builder.append("'");
+        }else if(column instanceof List){
+            builder.append("(");
+            for(int i=0;i<((List) column).size();i++){
+                builder.append("?");
+                if(i!=((List) column).size()-1){
+                    builder.append(",");
+                }
+            }
+            builder.append(")");
+        }else if(column instanceof Object[]){
+            builder.append("(");
+            for(int i=0;i<((Object[]) column).length;i++){
+                builder.append("?");
+                if(i!=((Object[]) column).length-1){
+                    builder.append(",");
+                }
+            }
+            builder.append(")");
         }else builder.append("?");
         return builder.toString();
     }
 
     @Override
     public void addValue(List list) {
-        list.add(column);
+        if(column instanceof List){
+            for(Object os:(List)column){
+                list.add(os);
+            }
+        }else if(column instanceof Object[]){
+            for(Object os:(Object[]) column){
+                list.add(os);
+            }
+        }else list.add(column);
     }
 }
