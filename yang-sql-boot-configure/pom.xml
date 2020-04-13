@@ -6,7 +6,7 @@
 
     <groupId>top.sanguohf.egg</groupId>
     <artifactId>yang-sql-boot-configure</artifactId>
-    <version>1.0.7-release</version>
+    <version>1.0.8-release</version>
     <name>yang-sql-boot-configure</name>
     <description>和SpringBoot配置</description>
     <url>https://github.com/yangrui110/yang-sql/yang-sql-boot-configure</url>
@@ -29,7 +29,7 @@
         <dependency>
             <groupId>top.sanguohf.egg</groupId>
             <artifactId>yang-sql-parse</artifactId>
-            <version>1.0.7-release</version>
+            <version>1.0.8-release</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
