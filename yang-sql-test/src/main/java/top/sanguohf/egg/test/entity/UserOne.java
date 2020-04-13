@@ -10,11 +10,10 @@ import java.util.Date;
 
 @Data
 @TableName("user")
-public class UserOne {
+public class UserOne extends User{
 
     private String userName;
     private String password;
-    private String id;
     private BigDecimal price;
     @IgnoreSelectReback
     private Date blobOne;

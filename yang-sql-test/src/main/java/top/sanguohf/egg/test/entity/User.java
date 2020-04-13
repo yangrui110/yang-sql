@@ -12,10 +12,5 @@ import java.math.BigDecimal;
 @TableName("user")
 public class User {
     @Id
-    @Field("user_name")
-    private String userName;
-    private String password;
     protected String id;
-    @IgnoreSelectReback
-    private BigDecimal price;
 }

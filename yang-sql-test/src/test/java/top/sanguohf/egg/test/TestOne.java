@@ -77,7 +77,7 @@ public class TestOne {
         objects.add(one1);
         commonService.batchSaveEntity(objects);
         UserOne userOne = new UserOne();
-        List list = commonService.findEntityList(userOne,UserOne.class);
+        CommonPageResp<List<UserOne>> list = commonService.findEntityPageList(userOne, UserOne.class, new Page(1, 2));
         System.out.println(list);
         /*ArrayList<String> list1 = new ArrayList<>();
         list1.add("111");
