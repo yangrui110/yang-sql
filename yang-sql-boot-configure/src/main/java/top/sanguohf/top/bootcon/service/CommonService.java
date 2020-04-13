@@ -14,6 +14,10 @@ public interface CommonService {
     /** @param params
      * */
     List findList(EntityParams params) throws ClassNotFoundException, NoSuchFieldException, IOException;
+    /**
+     * 根据主键集合找到对应的值
+     * */
+    List findListByPrimaryKeys(List<EntityParams> params) throws ClassNotFoundException, NoSuchFieldException, IOException;
     /** @param params
      *  */
     long count(EntityParams params) throws ClassNotFoundException, NoSuchFieldException, IOException;
@@ -35,10 +39,14 @@ public interface CommonService {
     /** @param params
      * */
     void batchDelete(List<EntityParams> params) throws IOException;
+    /**
+     * 批量保存方法，1、主键存在，则更新 2、主键不存在，则插入
+     * */
+    void batchSave(List<EntityParams> params) throws IOException;
 
-    <T> CommonPageResp<T> findEntityPageList(T data, Page page) throws Exception;
+    <T> CommonPageResp<List<T>> findEntityPageList(T data, Class<T> tClass, Page page) throws Exception;
 
-    <T> List findEntityList(T params) throws Exception;
+    <T> List<T> findEntityList(T params,Class<T> tClass) throws Exception;
     /** @param params
      *  */
     <T> long countEntity(T params) throws Exception;
@@ -57,4 +65,6 @@ public interface CommonService {
     /** @param params
      *  */
     <T> void batchEntityUpdate(List<T> params) throws Exception;
+
+    <T> void batchEntityDelete(List<T> params) throws Exception;
 }

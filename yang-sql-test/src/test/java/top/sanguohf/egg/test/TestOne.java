@@ -74,9 +74,9 @@ public class TestOne {
         ArrayList objects = new ArrayList<>();
         objects.add(one);
         objects.add(one1);
-        commonService.batchEntityUpdate(objects);
+        commonService.batchEntityDelete(objects);
         UserOne userOne = new UserOne();
-        List list = commonService.findEntityList(userOne);
+        List list = commonService.findEntityList(userOne,UserOne.class);
         System.out.println(list);
     }
 

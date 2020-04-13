@@ -17,12 +17,14 @@ import top.sanguohf.top.bootcon.page.Page;
 import top.sanguohf.top.bootcon.resp.CommonPageResp;
 import top.sanguohf.top.bootcon.service.CommonService;
 import top.sanguohf.top.bootcon.util.ClassInfoUtil;
+import top.sanguohf.top.bootcon.util.ObjectUtil;
 import top.sanguohf.top.bootcon.util.ParamEntityParseUtil;
 
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -69,7 +71,6 @@ public class CommonServiceImpl implements CommonService {
         EntityParams params1 = inteceptor(params);
         EntitySelectSql selectSql = new EntityParamParse(params1).parseToEntitySelectSql();
         String sqlOne = selectSql.sqlOne(true);
-        System.out.println(sqlOne);
         LinkedList objects = new LinkedList<>();
         selectSql.addValue(objects);
         List<Map<String, Object>> mapList = jdbcTemplate.queryForList(sqlOne, objects.toArray());
@@ -77,6 +78,14 @@ public class CommonServiceImpl implements CommonService {
         ConsoleSqlUtil.consoleParam(objects);
         ConsoleSqlUtil.consoleResult(mapList);
         return mapList;
+    }
+
+    @Override
+    public List findListByPrimaryKeys(List<EntityParams> params) throws ClassNotFoundException, NoSuchFieldException, IOException {
+        for(EntityParams params1:params){
+
+        }
+        return null;
     }
 
     @Override
@@ -143,17 +152,7 @@ public class CommonServiceImpl implements CommonService {
             con.setAutoCommit(false);
             for (EntityParams params1 : entityParams) {
                 EntityInsertSql updateSql = new EntityParamParse(params1).parseToEntityInertSql();
-                String sqlOne = updateSql.sqlOne(true);
-                LinkedList objects = new LinkedList<>();
-                updateSql.addValue(objects);
-                Object[] toArray = objects.toArray(); //提升访问效率
-                PreparedStatement statement = con.prepareStatement(sqlOne);
-                for (int i = 0; i < toArray.length; i++) {
-                    statement.setObject(i + 1, toArray[i]);
-                }
-                statement.executeUpdate();
-                ConsoleSqlUtil.console(sqlOne);
-                ConsoleSqlUtil.consoleParam(objects);
+                executeSql(updateSql,con);
             }
             con.commit();
         }catch (Exception e){
@@ -163,6 +162,19 @@ public class CommonServiceImpl implements CommonService {
         }
     }
 
+    private void executeSql(AbstractEntityJoinTable updateSql,Connection con) throws SQLException {
+        String sqlOne = updateSql.sqlOne(true);
+        LinkedList objects = new LinkedList<>();
+        updateSql.addValue(objects);
+        Object[] toArray = objects.toArray(); //提升访问效率
+        PreparedStatement statement = con.prepareStatement(sqlOne);
+        for (int i = 0; i < toArray.length; i++) {
+            statement.setObject(i + 1, toArray[i]);
+        }
+        statement.executeUpdate();
+        ConsoleSqlUtil.console(sqlOne);
+        ConsoleSqlUtil.consoleParam(objects);
+    }
     private Object[] collectSortValue(List<EntityInsert> list,List<EntityInsert> firstDomColumns){
         Object[] value = new Object[list.size()];
         int i= 0;
@@ -189,17 +201,7 @@ public class CommonServiceImpl implements CommonService {
             con.setAutoCommit(false);
             for (EntityParams params1 : entityParams) {
                 EntityUpdateSql updateSql = new EntityParamParse(params1).parseToEntityUpdateSql();
-                String sqlOne = updateSql.sqlOne(true);
-                LinkedList objects = new LinkedList<>();
-                updateSql.addValue(objects);
-                Object[] toArray = objects.toArray(); //提升访问效率
-                PreparedStatement statement = con.prepareStatement(sqlOne);
-                for (int i = 0; i < toArray.length; i++) {
-                    statement.setObject(i + 1, toArray[i]);
-                }
-                statement.executeUpdate();
-                ConsoleSqlUtil.console(sqlOne);
-                ConsoleSqlUtil.consoleParam(objects);
+                executeSql(updateSql,con);
             }
             con.commit();
         }catch (Exception e){
@@ -218,17 +220,7 @@ public class CommonServiceImpl implements CommonService {
             con.setAutoCommit(false);
             for (EntityParams params1 : entityParams) {
                 EntityDeleteSql updateSql = new EntityParamParse(params1).parseToEntityDeleteSql();
-                String sqlOne = updateSql.sqlOne(true);
-                LinkedList objects = new LinkedList<>();
-                updateSql.addValue(objects);
-                Object[] toArray = objects.toArray(); //提升访问效率
-                PreparedStatement statement = con.prepareStatement(sqlOne);
-                for (int i = 0; i < toArray.length; i++) {
-                    statement.setObject(i + 1, toArray[i]);
-                }
-                statement.executeUpdate();
-                ConsoleSqlUtil.console(sqlOne);
-                ConsoleSqlUtil.consoleParam(objects);
+                executeSql(updateSql,con);
             }
             con.commit();
         }catch (Exception e){
@@ -239,15 +231,33 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public <T> CommonPageResp<T> findEntityPageList(T data, Page page) throws Exception {
+    public void batchSave(List<EntityParams> params) throws IOException {
+        //1.首先根据主键集合找到所有符合条件的数据
+        //2.根据数据的存在与否，构造出不同的SQL语句
+        //3.执行批量操作，更新数据库
+    }
+
+    /**
+     * @param data 查询的对象
+     * @param tClass 返回的对象
+     * @param page 分页参数
+     * */
+    @Override
+    public <T> CommonPageResp<List<T>> findEntityPageList(T data, Class<T> tClass, Page page) throws Exception {
         EntityParams entityParams = ParamEntityParseUtil.parseToParam(data);
-        return findPageList(entityParams,page);
+        CommonPageResp pageList = findPageList(entityParams, page);
+        List listData = (List) pageList.getData();
+        List<T> parseList = ObjectUtil.parseList(listData, tClass);
+        pageList.setData(parseList);
+        return pageList;
     }
 
     @Override
-    public <T> List findEntityList(T params) throws Exception {
+    public <T> List<T> findEntityList(T params,Class<T> tClass) throws Exception {
         EntityParams entityParams = ParamEntityParseUtil.parseToParam(params);
-        return findList(entityParams);
+        List list = findList(entityParams);
+        List<T> parseList = ObjectUtil.parseList(list, tClass);
+        return parseList;
     }
 
     @Override
@@ -290,6 +300,15 @@ public class CommonServiceImpl implements CommonService {
             entityParams.add(ParamEntityParseUtil.parseToParam(data));
         }
        batchUpdate(entityParams);
+    }
+
+    @Override
+    public <T> void batchEntityDelete(List<T> params) throws Exception {
+        ArrayList<EntityParams> entityParams = new ArrayList<>();
+        for(T data:params){
+            entityParams.add(ParamEntityParseUtil.parseToParam(data));
+        }
+        batchDelete(entityParams);
     }
 
     private EntityParams inteceptor(EntityParams params) throws IOException {
