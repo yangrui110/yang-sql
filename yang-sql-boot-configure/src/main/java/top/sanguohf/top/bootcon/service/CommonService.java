@@ -31,7 +31,7 @@ public interface CommonService {
     void batchInsert(List<EntityParams> params) throws IOException;
     /** @param params
      *  */
-    void batchUpdate(List<EntityParams> params) throws IOException;
+    void batchUpdate(List<EntityParams> params) throws Exception;
     /** @param params
      * */
     void batchDelete(List<EntityParams> params) throws IOException;
@@ -56,5 +56,5 @@ public interface CommonService {
     <T> void batchEntityInsert(List<T> params) throws IOException, IllegalAccessException;
     /** @param params
      *  */
-    <T> void batchEntityUpdate(List<T> params) throws IOException, IllegalAccessException;
+    <T> void batchEntityUpdate(List<T> params) throws Exception;
 }

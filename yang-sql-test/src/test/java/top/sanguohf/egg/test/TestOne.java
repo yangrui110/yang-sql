@@ -66,14 +66,15 @@ public class TestOne {
         UserOne one = new UserOne();
         one.setId("1234567");
         one.setPassword("kkkkk");
-        one.setUserName("王五--1");
+        one.setUserName("张综上所述--8");
         UserOne one1 = new UserOne();
-        one1.setId("12345678");
-        one1.setPassword("kkkkk");
-        one1.setUserName("王五--1");
+        one1.setId("19980999");
+        one1.setPassword("jjjjj");
+        one1.setUserName("王五--2");
         ArrayList objects = new ArrayList<>();
         objects.add(one);
-        commonService.batchUpdate(objects);
+        objects.add(one1);
+        commonService.batchEntityUpdate(objects);
         UserOne userOne = new UserOne();
         List list = commonService.findEntityList(userOne);
         System.out.println(list);
@@ -126,7 +127,7 @@ public class TestOne {
     }
 
     @Test
-    public void test7() throws IOException {
+    public void test7() throws Exception {
         List<EntityParams> linkedList = new LinkedList<>();
         EntityParams params1 = new EntityParams();
         params1.setTableClassName("UserOne");

@@ -1,5 +1,11 @@
 package top.sanguohf.top.bootcon.service.impl;
 
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import top.sanguohf.egg.base.EntityInsert;
 import top.sanguohf.egg.ops.*;
 import top.sanguohf.egg.param.EntityParamParse;
@@ -11,14 +17,12 @@ import top.sanguohf.top.bootcon.page.Page;
 import top.sanguohf.top.bootcon.resp.CommonPageResp;
 import top.sanguohf.top.bootcon.service.CommonService;
 import top.sanguohf.top.bootcon.util.ClassInfoUtil;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import top.sanguohf.top.bootcon.util.ParamEntityParseUtil;
 
+import javax.sql.DataSource;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,6 +39,8 @@ public class CommonServiceImpl implements CommonService {
 
     @Autowired
     DataBaseTypeInit dbType;
+    @Autowired
+    DataSource dataSource;
 
     @Override
     public CommonPageResp findPageList(EntityParams params, Page page) throws ClassNotFoundException, NoSuchFieldException, IOException {
@@ -130,37 +136,30 @@ public class CommonServiceImpl implements CommonService {
     @Transactional
     @Override
     public void batchInsert(List<EntityParams> params) throws IOException {
-        if(params.size()>0) {
-            List<EntityParams> entityParams = inteceptorList(params);
-            LinkedList<EntityInsertSql> strings = entityParams.stream().collect(LinkedList<EntityInsertSql>::new, (list, v) -> {
-                try {
-                    EntityInsertSql updateSql = new EntityParamParse(v).parseToEntityInertSql();
-                    list.add(updateSql);
-                } catch (ClassNotFoundException | NoSuchFieldException e) {
-                    e.printStackTrace();
+        List<EntityParams> entityParams = inteceptorList(params);
+        Connection con = null;
+        try {
+            con=DataSourceUtils.getConnection(dataSource);
+            con.setAutoCommit(false);
+            for (EntityParams params1 : entityParams) {
+                EntityInsertSql updateSql = new EntityParamParse(params1).parseToEntityInertSql();
+                String sqlOne = updateSql.sqlOne(true);
+                LinkedList objects = new LinkedList<>();
+                updateSql.addValue(objects);
+                Object[] toArray = objects.toArray(); //提升访问效率
+                PreparedStatement statement = con.prepareStatement(sqlOne);
+                for (int i = 0; i < toArray.length; i++) {
+                    statement.setObject(i + 1, toArray[i]);
                 }
-            }, List::addAll);
-            //检测长度是否是一致
-            EntityInsertSql first = strings.getFirst();
-            for(EntityInsertSql one:strings){
-                if(first.getInsertList().size()!=one.getInsertList().size()){
-                    throw new RuntimeException("批量插入的数据列数不一致");
-                }
+                statement.executeUpdate();
+                ConsoleSqlUtil.console(sqlOne);
+                ConsoleSqlUtil.consoleParam(objects);
             }
-            List<Object[]> values = new LinkedList<>();
-            //保证排序的一致性
-            List<EntityInsert> insertList = first.getInsertList();
-
-            //根据列名的顺序收集到值
-            for (EntityInsertSql one : strings) {
-                List<EntityInsert> list = one.getInsertList();
-                values.add(collectSortValue(list,insertList));
-            }
-            //获取到预加载的sql语句
-            String sqlOne = first.sqlOne(true);
-            ConsoleSqlUtil.console(sqlOne);
-            ConsoleSqlUtil.consoleParams(values);
-            jdbcTemplate.batchUpdate(sqlOne,values);
+            con.commit();
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            DataSourceUtils.releaseConnection(con, dataSource);
         }
     }
 
@@ -181,79 +180,61 @@ public class CommonServiceImpl implements CommonService {
         }
         return value;
     }
-    @Transactional
     @Override
-    public void batchUpdate(List<EntityParams> params) throws IOException {
-        if(params.size()>0) {
-            List<EntityParams> entityParams = inteceptorList(params);
-            LinkedList<EntityUpdateSql> strings = entityParams.stream().collect(LinkedList<EntityUpdateSql>::new, (list, v) -> {
-                try {
-                    EntityUpdateSql updateSql = new EntityParamParse(v).parseToEntityUpdateSql();
-                    list.add(updateSql);
-                } catch (ClassNotFoundException | NoSuchFieldException e) {
-                    e.printStackTrace();
+    public void batchUpdate(List<EntityParams> params) throws Exception {
+        List<EntityParams> entityParams = inteceptorList(params);
+        Connection con = null;
+        try {
+             con=DataSourceUtils.getConnection(dataSource);
+            con.setAutoCommit(false);
+            for (EntityParams params1 : entityParams) {
+                EntityUpdateSql updateSql = new EntityParamParse(params1).parseToEntityUpdateSql();
+                String sqlOne = updateSql.sqlOne(true);
+                LinkedList objects = new LinkedList<>();
+                updateSql.addValue(objects);
+                Object[] toArray = objects.toArray(); //提升访问效率
+                PreparedStatement statement = con.prepareStatement(sqlOne);
+                for (int i = 0; i < toArray.length; i++) {
+                    statement.setObject(i + 1, toArray[i]);
                 }
-            }, List::addAll);
-            //检测长度是否是一致
-            EntityUpdateSql first = strings.getFirst();
-            for(EntityUpdateSql one:strings){
-                int len1 = first.getWheres().size()+first.getUpdates().size();
-                int len2 = one.getUpdates().size()+one.getWheres().size();
-                if(len1!=len2){
-                    throw new RuntimeException("批量更新的数据列不一致");
-                }
+                statement.executeUpdate();
+                ConsoleSqlUtil.console(sqlOne);
+                ConsoleSqlUtil.consoleParam(objects);
             }
-            List<Object[]> values = new LinkedList<>();
-            //根据列名的顺序收集到值
-            for (EntityUpdateSql one : strings) {
-                Object[] updates = collectSortValue(one.getUpdates(), first.getUpdates());
-                Object[] wheres = collectSortValue(one.getWheres(), first.getWheres());
-                Object[] objects = new Object[updates.length + wheres.length];
-                System.arraycopy(updates,0,objects,0,updates.length);
-                System.arraycopy(wheres,0,objects,updates.length,wheres.length);
-                values.add(objects);
-            }
-            //获取到预加载的sql语句
-            String sqlOne = first.sqlOne(true);
-            ConsoleSqlUtil.console(sqlOne);
-            ConsoleSqlUtil.consoleParams(values);
-            jdbcTemplate.batchUpdate(sqlOne,values);
+            con.commit();
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            DataSourceUtils.releaseConnection(con, dataSource);
         }
     }
 
     @Override
     public void batchDelete(List<EntityParams> params) throws IOException {
-        if(params.size()>0) {
-            List<EntityParams> entityParams = inteceptorList(params);
-            LinkedList<EntityDeleteSql> strings = entityParams.stream().collect(LinkedList<EntityDeleteSql>::new, (list, v) -> {
-                try {
-                    EntityDeleteSql updateSql = new EntityParamParse(v).parseToEntityDeleteSql();
-                    list.add(updateSql);
-                } catch (ClassNotFoundException | NoSuchFieldException e) {
-                    e.printStackTrace();
+        List<EntityParams> entityParams = inteceptorList(params);
+        Connection con = null;
+        try {
+            con=DataSourceUtils.getConnection(dataSource);
+            con.setAutoCommit(false);
+            for (EntityParams params1 : entityParams) {
+                EntityDeleteSql updateSql = new EntityParamParse(params1).parseToEntityDeleteSql();
+                String sqlOne = updateSql.sqlOne(true);
+                LinkedList objects = new LinkedList<>();
+                updateSql.addValue(objects);
+                Object[] toArray = objects.toArray(); //提升访问效率
+                PreparedStatement statement = con.prepareStatement(sqlOne);
+                for (int i = 0; i < toArray.length; i++) {
+                    statement.setObject(i + 1, toArray[i]);
                 }
-            }, List::addAll);
-            //检测长度是否是一致
-            EntityDeleteSql first = strings.getFirst();
-            for(EntityDeleteSql one:strings){
-                if(first.getWheres().size()!=one.getWheres().size()){
-                    throw new RuntimeException("批量删除数据列数不一致");
-                }
+                statement.executeUpdate();
+                ConsoleSqlUtil.console(sqlOne);
+                ConsoleSqlUtil.consoleParam(objects);
             }
-            List<Object[]> values = new LinkedList<>();
-            //保证排序的一致性
-            List<EntityInsert> insertList = first.getWheres();
-
-            //根据列名的顺序收集到值
-            for (EntityDeleteSql one : strings) {
-                List<EntityInsert> list = one.getWheres();
-                values.add(collectSortValue(list,insertList));
-            }
-            //获取到预加载的sql语句
-            String sqlOne = first.sqlOne(true);
-            ConsoleSqlUtil.console(sqlOne);
-            ConsoleSqlUtil.consoleParams(values);
-            jdbcTemplate.batchUpdate(sqlOne,values);
+            con.commit();
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            DataSourceUtils.releaseConnection(con, dataSource);
         }
     }
 
@@ -303,12 +284,12 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public <T> void batchEntityUpdate(List<T> params) throws IOException, IllegalAccessException {
+    public <T> void batchEntityUpdate(List<T> params) throws Exception {
         ArrayList<EntityParams> entityParams = new ArrayList<>();
         for(T data:params){
             entityParams.add(ParamEntityParseUtil.parseToParam(data));
         }
-        batchUpdate(entityParams);
+       batchUpdate(entityParams);
     }
 
     private EntityParams inteceptor(EntityParams params) throws IOException {
