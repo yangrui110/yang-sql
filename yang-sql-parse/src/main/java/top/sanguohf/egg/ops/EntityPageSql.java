@@ -51,6 +51,10 @@ public class EntityPageSql{
             this.selectSql.addValue(list);
             list.add(end);
             list.add(start);
+        }else if(dbType.getValue().equals(DbType.SQL.getValue())){
+            this.selectSql.addValue(list);
+            list.add(start+1);
+            list.add(end);
         }else{
             this.selectSql.addValue(list);
             list.add(start);
@@ -62,7 +66,7 @@ public class EntityPageSql{
         // TODO: implement
         StringBuilder builder = new StringBuilder();
         builder.append("select count(1) as __total__");
-        makeOtherCommon(builder,isPrepare);
+        makeOtherCommon(builder,isPrepare,true);
         return builder.toString();
     }
 
@@ -79,8 +83,8 @@ public class EntityPageSql{
     private String toSQL(int page, int size,boolean isPrepare){
         StringBuilder builder = new StringBuilder();
         builder.append("WITH selectTemp AS (SELECT TOP 100 PERCENT ROW_NUMBER ( ) OVER ( ORDER BY CURRENT_TIMESTAMP ) AS __row_number__,").append(EntityParseUtil.parseList(selectSql.getColumns()));
-        makeOtherCommon(builder,isPrepare);
-        int start = (page-1)*size;
+        makeOtherCommon(builder,isPrepare,false);
+        int start = (page-1)*size+1;
         int end = page*size;
         builder.append(") SELECT * FROM selectTemp  WHERE __row_number__ BETWEEN ").append(isPrepare?"?":start).append(" AND ").append(isPrepare?"?":end).append("  ORDER BY __row_number__");
         return builder.toString();
@@ -92,7 +96,7 @@ public class EntityPageSql{
         StringBuilder builder = new StringBuilder();
         builder.append("with selectTemp as(select ROWNUM AS __rownum__,").append(EntityParseUtil.parseList(selectSql.getColumns()));
         builder.append(" from ").append(selectSql.getTabelName());
-        int start = (page-1)*size;
+        int start = (page-1)*size+1;
         int end = page*size;
         if(!StringUtils.isEmpty(selectSql.getTableAlias()))
             builder.append(" ").append(selectSql.getTableAlias());
@@ -118,7 +122,7 @@ public class EntityPageSql{
         return builder.toString();
     }
 
-    private void makeOtherCommon(StringBuilder builder,boolean isPrepare){
+    private void makeOtherCommon(StringBuilder builder,boolean isPrepare,boolean isCount){
         builder.append(" from ").append(selectSql.getTabelName().toSql());
         if(!StringUtils.isEmpty(selectSql.getTableAlias()))
             builder.append(" ").append(selectSql.getTableAlias());
@@ -135,7 +139,7 @@ public class EntityPageSql{
 
         }
         //
-        if(selectSql.getOrderBys()!=null&&selectSql.getOrderBys().size()>0){
+        if(selectSql.getOrderBys()!=null&&selectSql.getOrderBys().size()>0&&!isCount){
             builder.append(" ").append(" order by ").append(EntityParseUtil.parseList(selectSql.getOrderBys()));
         }
     }

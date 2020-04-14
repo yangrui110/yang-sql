@@ -41,11 +41,11 @@ public class ObjectUtil {
                 if (mapName.equals(declarName)) {
                     field.set(instance, o);
                 } else {
-                    if (Date.class.getName().equals(declarName) && "java.sql.Date".equals(mapName)) {//转换日期
+                    if (Date.class.getName().equals(declarName) && ("java.sql.Date".equals(mapName)||"java.sql.Timestamp".equals(mapName))) {//转换日期
                         Date date = (Date) map.get(name);
                         java.sql.Date date1 = new java.sql.Date(date.getTime());
                         field.set(instance, date1);
-                    } else if (Date.class.getName().equals(mapName) && "java.sql.Date".equals(declarName)) {
+                    } else if (Date.class.getName().equals(mapName) && ("java.sql.Date".equals(declarName)||"java.sql.Timestamp".equals(declarName))) {
                         java.sql.Date date = (java.sql.Date) map.get(name);
                         Date date1 = new Date(date.getTime());
                         field.set(instance, date1);

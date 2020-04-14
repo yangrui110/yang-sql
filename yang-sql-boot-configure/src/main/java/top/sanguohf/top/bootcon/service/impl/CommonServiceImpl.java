@@ -281,6 +281,12 @@ public class CommonServiceImpl implements CommonService {
         EntityParams entityParams = ParamEntityParseUtil.parseToParam(data);
         CommonPageResp pageList = findPageList(entityParams, page);
         List listData = (List) pageList.getData();
+        if(listData==null) {
+            CommonPageResp<List<T>> resp = new CommonPageResp<>();
+            resp.setData(new ArrayList<>());
+            resp.setCount(0);
+            return resp;
+        }
         List<T> parseList = ObjectUtil.parseList(listData, tClass);
         pageList.setData(parseList);
         return pageList;
@@ -290,6 +296,10 @@ public class CommonServiceImpl implements CommonService {
     public <T> List<T> findEntityList(T params,Class<T> tClass) throws Exception {
         EntityParams entityParams = ParamEntityParseUtil.parseToParam(params);
         List list = findList(entityParams);
+        if(list==null) {
+            ArrayList<T> list1 = new ArrayList<>();
+            return list1;
+        }
         List<T> parseList = ObjectUtil.parseList(list, tClass);
         return parseList;
     }
