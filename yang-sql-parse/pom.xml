@@ -6,7 +6,7 @@
 
     <groupId>top.sanguohf.egg</groupId>
     <artifactId>yang-sql-parse</artifactId>
-    <version>1.0.8-release</version>
+    <version>1.0.9-release</version>
     <packaging>jar</packaging>
     <name>yang-sql-parse</name>
     <description>SQL转换器</description>

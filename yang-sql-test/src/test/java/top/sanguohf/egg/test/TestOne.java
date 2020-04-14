@@ -77,6 +77,7 @@ public class TestOne {
         objects.add(one1);
         commonService.batchSaveEntity(objects);
         UserOne userOne = new UserOne();
+
         CommonPageResp<List<UserOne>> list = commonService.findEntityPageList(userOne, UserOne.class, new Page(1, 2));
         System.out.println(list);
         /*ArrayList<String> list1 = new ArrayList<>();
@@ -155,6 +156,13 @@ public class TestOne {
         linkedList.add(params1);
         linkedList.add(params2);
         commonService.batchUpdate(linkedList);
+    }
+    @Test
+    public void test9() throws NoSuchFieldException {
+        float a = 10.998f;
+        Float aFloat = new Float(a);
+        System.out.println(Float.parseFloat(""+aFloat));
+        //System.out.println(UserOne.class.getDeclaredField("userName").getDeclaringClass().getName());
     }
 
 }

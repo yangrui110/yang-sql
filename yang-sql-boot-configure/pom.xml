@@ -6,19 +6,12 @@
 
     <groupId>top.sanguohf.egg</groupId>
     <artifactId>yang-sql-boot-configure</artifactId>
-    <version>1.0.8-release</version>
+    <version>1.0.9-release</version>
     <name>yang-sql-boot-configure</name>
     <description>和SpringBoot配置</description>
     <url>https://github.com/yangrui110/yang-sql/yang-sql-boot-configure</url>
 
     <dependencies>
-
-        <!-- https://mvnrepository.com/artifact/commons-beanutils/commons-beanutils -->
-        <dependency>
-            <groupId>commons-beanutils</groupId>
-            <artifactId>commons-beanutils</artifactId>
-            <version>1.9.4</version>
-        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -29,7 +22,7 @@
         <dependency>
             <groupId>top.sanguohf.egg</groupId>
             <artifactId>yang-sql-parse</artifactId>
-            <version>1.0.8-release</version>
+            <version>1.0.9-release</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

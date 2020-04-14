@@ -1,7 +1,7 @@
 package top.sanguohf.top.bootcon.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.beanutils.BeanUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -392,7 +392,7 @@ public class CommonServiceImpl implements CommonService {
 
     private EntityParams inteceptor(EntityParams params) throws IOException, InvocationTargetException, IllegalAccessException {
         EntityParams params1 = new EntityParams();
-        BeanUtils.copyProperties(params1,params);
+        BeanUtils.copyProperties(params,params1);
         String classPackage = ClassInfoUtil.getPackageByRelativeName(params.getTableClassName(),configure.getBasePackage());
         params1.setTableClassName(classPackage);
         return params1;
@@ -404,7 +404,7 @@ public class CommonServiceImpl implements CommonService {
         String classPackage = ClassInfoUtil.getPackageByRelativeName(params.getTableClassName(),configure.getBasePackage());
         for(EntityParams pl: prs){
             EntityParams entityParams = new EntityParams();
-            BeanUtils.copyProperties(entityParams,pl);
+            BeanUtils.copyProperties(pl,entityParams);
             entityParams.setTableClassName(classPackage);
             list.add(entityParams);
         }
