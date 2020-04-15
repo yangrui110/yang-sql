@@ -124,14 +124,12 @@ public interface CommonService {
      * 根据主键查找到对应的值
      * 适用于主键数目为单个
      */
-    @Deprecated
     <T,E> E findByPrimaryKey(Class<T> viewClass,Class<E> toJavaBean , Object key) throws NoSuchFieldException, ClassNotFoundException, IOException, Exception;
 
     /**
      * 根据主键查找到对应的值
      * 适用于主键数目为单个
      */
-    @Deprecated
     <T,E> List<E> findByPrimaryKeys(Class<T> viewClass,Class<E> toJavaBean, List<? extends Object> keys) throws NoSuchFieldException, ClassNotFoundException, IOException, Exception;
 
     <T> void batchSaveEntity(List<T> entitys) throws Exception;
