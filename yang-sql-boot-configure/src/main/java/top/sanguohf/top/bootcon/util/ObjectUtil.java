@@ -29,6 +29,10 @@ public class ObjectUtil {
         return linkedList;
     }
     public static void copyMapToBean(Map map,Object instance) throws IllegalAccessException, InstantiationException {
+        if(instance instanceof Map){
+            instance = map;
+            return;
+        }
         Class<?> aClass = instance.getClass();
         List<Field> fields = ReflectEntity.getFields(aClass);
         for (Field field:fields){

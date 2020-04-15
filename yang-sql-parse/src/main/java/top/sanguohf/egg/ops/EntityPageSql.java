@@ -66,7 +66,7 @@ public class EntityPageSql{
         // TODO: implement
         StringBuilder builder = new StringBuilder();
         builder.append("select count(1) as __total__");
-        makeOtherCommon(builder,isPrepare,true);
+        makeOtherCommon(builder,isPrepare);
         return builder.toString();
     }
 
@@ -82,15 +82,20 @@ public class EntityPageSql{
 
     private String toSQL(int page, int size,boolean isPrepare){
         StringBuilder builder = new StringBuilder();
-        builder.append("WITH selectTemp AS (SELECT TOP 100 PERCENT ROW_NUMBER ( ) OVER ( ORDER BY CURRENT_TIMESTAMP ) AS __row_number__,").append(EntityParseUtil.parseList(selectSql.getColumns()));
-        makeOtherCommon(builder,isPrepare,false);
+        builder.append("WITH selectTemp AS (SELECT TOP 100 PERCENT ROW_NUMBER ( ) OVER ( ");
+        //定义排序字段
+        if(selectSql.getOrderBys()!=null&&selectSql.getOrderBys().size()>0){
+            builder.append(" ").append(" order by ").append(EntityParseUtil.parseList(selectSql.getOrderBys()));
+        }else builder.append("ORDER BY CURRENT_TIMESTAMP");
+
+        builder.append(" ) AS __row_number__,").append(EntityParseUtil.parseList(selectSql.getColumns()));
+        makeOtherCommon(builder,isPrepare);
+
         int start = (page-1)*size+1;
         int end = page*size;
         builder.append(") SELECT * FROM selectTemp  WHERE __row_number__ BETWEEN ").append(isPrepare?"?":start).append(" AND ").append(isPrepare?"?":end).append("  ORDER BY __row_number__");
         return builder.toString();
     }
-
-
 
     private String toOracleSql(int page,int size,boolean isPrepare){
         StringBuilder builder = new StringBuilder();
@@ -122,7 +127,7 @@ public class EntityPageSql{
         return builder.toString();
     }
 
-    private void makeOtherCommon(StringBuilder builder,boolean isPrepare,boolean isCount){
+    private void makeOtherCommon(StringBuilder builder,boolean isPrepare){
         builder.append(" from ").append(selectSql.getTabelName().toSql());
         if(!StringUtils.isEmpty(selectSql.getTableAlias()))
             builder.append(" ").append(selectSql.getTableAlias());
@@ -137,10 +142,6 @@ public class EntityPageSql{
                 builder.append(" ").append(simpleJoin.toSql());
             }
 
-        }
-        //
-        if(selectSql.getOrderBys()!=null&&selectSql.getOrderBys().size()>0&&!isCount){
-            builder.append(" ").append(" order by ").append(EntityParseUtil.parseList(selectSql.getOrderBys()));
         }
     }
 

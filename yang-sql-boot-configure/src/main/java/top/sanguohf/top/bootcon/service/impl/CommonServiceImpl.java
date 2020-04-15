@@ -8,11 +8,13 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.sanguohf.egg.base.EntityInsert;
+import top.sanguohf.egg.base.EntityOrderBy;
 import top.sanguohf.egg.ops.*;
 import top.sanguohf.egg.param.EntityParamParse;
 import top.sanguohf.egg.param.EntityParams;
 import top.sanguohf.egg.reflect.ReflectEntity;
 import top.sanguohf.egg.util.ConsoleSqlUtil;
+import top.sanguohf.egg.util.EntityConditionBuilder;
 import top.sanguohf.top.bootcon.config.DataBaseTypeInit;
 import top.sanguohf.top.bootcon.config.ScanEntityConfigure;
 import top.sanguohf.top.bootcon.page.Page;
@@ -162,7 +164,12 @@ public class CommonServiceImpl implements CommonService {
         Object[] toArray = objects.toArray(); //提升访问效率
         PreparedStatement statement = con.prepareStatement(sqlOne);
         for (int i = 0; i < toArray.length; i++) {
-            statement.setObject(i + 1, toArray[i]);
+            Object o = toArray[i];
+            if(o instanceof Date){
+                java.sql.Date date = new java.sql.Date(((Date) o).getTime());
+                statement.setObject(i + 1,date );
+            }else statement.setObject(i + 1, o);
+
         }
         statement.executeUpdate();
         ConsoleSqlUtil.console(sqlOne);
@@ -241,7 +248,7 @@ public class CommonServiceImpl implements CommonService {
             primaryKey = entityInserts.get(0).getColumn();
         }
         List<Object> collect = arrayList.stream().map(item -> item.getValue()).collect(Collectors.toList());
-        List byPrimaryKeys = findByPrimaryKeys(t, collect);
+        List byPrimaryKeys = findByPrimaryKeys(t,t, collect);
         //2.根据数据的存在与否，构造出不同的SQL语句
         Connection con = null;
         try {
@@ -271,36 +278,146 @@ public class CommonServiceImpl implements CommonService {
         }
     }
 
-    /**
-     * @param data 查询的对象
-     * @param tClass 返回的对象
-     * @param page 分页参数
-     * */
     @Override
-    public <T> CommonPageResp<List<T>> findEntityPageList(T data, Class<T> tClass, Page page) throws Exception {
-        EntityParams entityParams = ParamEntityParseUtil.parseToParam(data);
+    public <T, E> CommonPageResp<List<E>> findEntityPageList(Class<T> viewClass, Class<E> toJavaBean, Page page) throws Exception {
+        EntityParams entityParams = new EntityParams();
+        entityParams.setTableClassName(viewClass.getSimpleName());
         CommonPageResp pageList = findPageList(entityParams, page);
         List listData = (List) pageList.getData();
         if(listData==null) {
-            CommonPageResp<List<T>> resp = new CommonPageResp<>();
+            CommonPageResp<List<E>> resp = new CommonPageResp<>();
             resp.setData(new ArrayList<>());
             resp.setCount(0);
             return resp;
         }
-        List<T> parseList = ObjectUtil.parseList(listData, tClass);
+        List<E> parseList = ObjectUtil.parseList(listData, toJavaBean);
+        pageList.setData(parseList);
+        return pageList;
+    }
+
+    /*@Override
+    public <T,E> CommonPageResp<List<E>> findEntityPageList(T data, Class<E> toJavaBean, Page page) throws Exception {
+        EntityParams entityParams = ParamEntityParseUtil.parseToParam(data);
+        CommonPageResp pageList = findPageList(entityParams, page);
+        List listData = (List) pageList.getData();
+        if(listData==null) {
+            CommonPageResp<List<E>> resp = new CommonPageResp<>();
+            resp.setData(new ArrayList<>());
+            resp.setCount(0);
+            return resp;
+        }
+        List<E> parseList = ObjectUtil.parseList(listData, toJavaBean);
+        pageList.setData(parseList);
+        return pageList;
+    }*/
+
+    @Override
+    public <T,E> CommonPageResp<List<E>> findEntityPageList(Class<T> viewClass,Class<E> toJavaBean, JSONObject condition, Page page) throws Exception {
+        EntityParams entityParams = new EntityParams();
+        entityParams.setTableClassName(viewClass.getSimpleName());
+        entityParams.setCondition(condition);
+        CommonPageResp pageList = findPageList(entityParams, page);
+        List listData = (List) pageList.getData();
+        if(listData==null) {
+            CommonPageResp<List<E>> resp = new CommonPageResp<>();
+            resp.setData(new ArrayList<>());
+            resp.setCount(0);
+            return resp;
+        }
+        List<E> parseList = ObjectUtil.parseList(listData, toJavaBean);
         pageList.setData(parseList);
         return pageList;
     }
 
     @Override
-    public <T> List<T> findEntityList(T params,Class<T> tClass) throws Exception {
+    public <T,E> CommonPageResp<List<E>> findEntityPageList(Class<T> viewClass,Class<E> toJavaBean, JSONObject condition, List<EntityOrderBy> orderBys, Page page) throws Exception {
+        EntityParams entityParams = new EntityParams();
+        entityParams.setTableClassName(viewClass.getSimpleName());
+        entityParams.setCondition(condition);
+        entityParams.setOrderBy(orderBys);
+        CommonPageResp pageList = findPageList(entityParams, page);
+        List listData = (List) pageList.getData();
+        if(listData==null) {
+            CommonPageResp<List<E>> resp = new CommonPageResp<>();
+            resp.setData(new ArrayList<>());
+            resp.setCount(0);
+            return resp;
+        }
+        List<E> parseList = ObjectUtil.parseList(listData, toJavaBean);
+        pageList.setData(parseList);
+        return pageList;
+    }
+
+    @Override
+    public <T,E> CommonPageResp<List<E>> findEntityPageList(Class<T> viewClass,Class<E> toJavaBean, List<EntityOrderBy> orderBys, Page page) throws Exception {
+        EntityParams entityParams = new EntityParams();
+        entityParams.setTableClassName(viewClass.getSimpleName());
+        entityParams.setOrderBy(orderBys);
+        CommonPageResp pageList = findPageList(entityParams, page);
+        List listData = (List) pageList.getData();
+        if(listData==null) {
+            CommonPageResp<List<E>> resp = new CommonPageResp<>();
+            resp.setData(new ArrayList<>());
+            resp.setCount(0);
+            return resp;
+        }
+        List<E> parseList = ObjectUtil.parseList(listData, toJavaBean);
+        pageList.setData(parseList);
+        return pageList;
+    }
+
+    @Override
+    public <T,E> List<E> findEntityList(T params,Class<E> toJavaBean) throws Exception {
         EntityParams entityParams = ParamEntityParseUtil.parseToParam(params);
         List list = findList(entityParams);
         if(list==null) {
-            ArrayList<T> list1 = new ArrayList<>();
+            ArrayList<E> list1 = new ArrayList<>();
             return list1;
         }
-        List<T> parseList = ObjectUtil.parseList(list, tClass);
+        List<E> parseList = ObjectUtil.parseList(list, toJavaBean);
+        return parseList;
+    }
+
+    @Override
+    public <T,E> List<E> findEntityList(Class<T> viewClass,Class<E> toJavaBean, JSONObject condition) throws Exception {
+        EntityParams entityParams = new EntityParams();
+        entityParams.setTableClassName(viewClass.getSimpleName());
+        entityParams.setCondition(condition);
+        List list = findList(entityParams);
+        if(list==null) {
+            ArrayList<E> list1 = new ArrayList<>();
+            return list1;
+        }
+        List<E> parseList = ObjectUtil.parseList(list, toJavaBean);
+        return parseList;
+    }
+
+    @Override
+    public <T,E> List<E> findEntityList(Class<T> viewClass,Class<E> toJavaBean, JSONObject condition, List<EntityOrderBy> orderBys) throws Exception {
+        EntityParams entityParams = new EntityParams();
+        entityParams.setTableClassName(viewClass.getSimpleName());
+        entityParams.setCondition(condition);
+        entityParams.setOrderBy(orderBys);
+        List list = findList(entityParams);
+        if(list==null) {
+            ArrayList<E> list1 = new ArrayList<>();
+            return list1;
+        }
+        List<E> parseList = ObjectUtil.parseList(list, toJavaBean);
+        return parseList;
+    }
+
+    @Override
+    public <T,E> List<E> findEntityList(Class<T> viewClass,Class<E> toJavaBean, List<EntityOrderBy> orderBys) throws Exception {
+        EntityParams entityParams = new EntityParams();
+        entityParams.setTableClassName(viewClass.getSimpleName());
+        entityParams.setOrderBy(orderBys);
+        List list = findList(entityParams);
+        if(list==null) {
+            ArrayList<E> list1 = new ArrayList<>();
+            return list1;
+        }
+        List<E> parseList = ObjectUtil.parseList(list, toJavaBean);
         return parseList;
     }
 
@@ -356,18 +473,17 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public <T> T findByPrimaryKey(Class<T> tClass, Object key) throws Exception {
+    public <T,E> E findByPrimaryKey(Class<T> viewClass,Class<E> toJavaBean, Object key) throws Exception {
         EntityParams entityParams = new EntityParams();
-        entityParams.setTableClassName(tClass.getSimpleName());
-        JSONObject hashMap = new JSONObject();
-        List<EntityInsert> inserts = ReflectEntity.reflectPrimaryKeys(tClass, new HashMap<>());
-        EntityInsert insert = inserts.get(0);
-        hashMap.put("left",insert.getColumn());
-        hashMap.put("right",key);
-        hashMap.put("relation","=");
-        entityParams.setCondition(hashMap);
+        entityParams.setTableClassName(viewClass.getSimpleName());
+        Map<String, Object> primaryKeys = ReflectEntity.reflectPrimaryKeys(viewClass);
+        EntityConditionBuilder builder = EntityConditionBuilder.getInstance();
+        for(String pk:primaryKeys.keySet()){
+            builder.eq(pk,key);
+        }
+        entityParams.setCondition(builder.combineAnd());
         List list = findList(entityParams);
-        List<T> parseList = ObjectUtil.parseList(list, tClass);
+        List<E> parseList = ObjectUtil.parseList(list, toJavaBean);
         if(parseList.size()>1)
             throw new RuntimeException("结果数大于2条，最多只能返回一条");
         if(parseList.size()>0)
@@ -376,18 +492,17 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public <T> List<T> findByPrimaryKeys(Class<T> tClass, List<? extends Object> keys) throws Exception {
+    public <T,E> List<E> findByPrimaryKeys(Class<T> viewClass,Class<E> toJavaBean, List<? extends Object> keys) throws Exception {
         EntityParams entityParams = new EntityParams();
-        entityParams.setTableClassName(tClass.getSimpleName());
-        JSONObject hashMap = new JSONObject();
-        List<EntityInsert> inserts = ReflectEntity.reflectPrimaryKeys(tClass, new HashMap<>());
-        EntityInsert insert = inserts.get(0);
-        hashMap.put("left",insert.getColumn());
-        hashMap.put("right",keys.toArray());
-        hashMap.put("relation","in");
-        entityParams.setCondition(hashMap);
+        entityParams.setTableClassName(viewClass.getSimpleName());
+        Map<String, Object> primaryKeys = ReflectEntity.reflectPrimaryKeys(viewClass);
+        EntityConditionBuilder builder = EntityConditionBuilder.getInstance();
+        for(String pk:primaryKeys.keySet()){
+            builder.in(pk,keys.toArray());
+        }
+        entityParams.setCondition(builder.combineAnd());
         List list = findList(entityParams);
-        List<T> parseList = ObjectUtil.parseList(list, tClass);
+        List<E> parseList = ObjectUtil.parseList(list, toJavaBean);
         return parseList;
     }
 

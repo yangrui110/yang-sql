@@ -29,10 +29,50 @@ public class ReflectEntity {
         return tableName;
     }
     /**
+     * 只查出主键的列
+     * */
+    public static Map<String,Object> reflectPrimaryKeys(Class entity) throws NoSuchFieldException, ClassNotFoundException {
+        while (entity.isAnnotationPresent(ViewTable.class)){
+            Field[] fields = entity.getDeclaredFields();
+            for(Field field:fields){
+                if(field.isAnnotationPresent(MainTable.class))
+                    entity = Class.forName(field.getGenericType().getTypeName());
+            }
+        }
+        HashMap<String, Object> result = new HashMap<>();
+        List<Field> fields = getFields(entity);
+        for(Field field:fields){
+            if(field.isAnnotationPresent(Id.class)){
+                String tableField = getTableField(entity, field.getName());
+                result.put(tableField,"");
+            }
+        }
+        if(result.size()>0)
+            return result;
+        else {
+            //查找当前的所有属性中是否存在名为id
+            try {
+                String tableField = getTableField(entity, "id");
+                result.put(tableField,"");
+            }catch (NoSuchFieldException ex){
+                throw new RuntimeException("主键不存在或者未设置");
+            }
+
+        }
+        return result;
+    }
+    /**
      * 解析出主键,首先查看是否存在@Id注解的列，如果存在，添加到返回值中
      * 不存在@Id注解，则会自动寻找名为id的属性作为注解
      * */
     public static List<EntityInsert> reflectPrimaryKeys(Class entity, Map<String,Object> columns) throws NoSuchFieldException, ClassNotFoundException {
+        if(entity.isAnnotationPresent(ViewTable.class)){
+            Field[] fields = entity.getDeclaredFields();
+            for(Field field:fields){
+                if(field.isAnnotationPresent(MainTable.class))
+                    entity = Class.forName(field.getGenericType().getTypeName());
+            }
+        }
         LinkedList<EntityInsert> ids = new LinkedList<>();
         for(String key:columns.keySet()){
             Field field = getFieldByName(entity,key);
