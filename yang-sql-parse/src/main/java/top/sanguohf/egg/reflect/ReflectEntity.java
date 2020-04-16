@@ -399,6 +399,8 @@ public class ReflectEntity {
                 return field;
             }
         }
-        throw new NoSuchFieldException();
+        StringBuilder builder = new StringBuilder();
+        builder.append("类：").append(type.getTypeName()).append("不存在的列:").append(name).append(";");
+        throw new NoSuchFieldException(builder.toString());
     }
 }

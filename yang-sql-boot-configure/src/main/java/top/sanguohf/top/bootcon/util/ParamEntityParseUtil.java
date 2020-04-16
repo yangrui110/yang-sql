@@ -19,7 +19,7 @@ public class ParamEntityParseUtil {
         for (Field field:fields){
             field.setAccessible(true);
             Object o = field.get(data);
-            if(o!=null&&!"".equals(o))
+            if(o!=null)
                 map.put(field.getName(),o);
         }
         entityParams.setTableClassName(name);

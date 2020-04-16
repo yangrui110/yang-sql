@@ -131,17 +131,16 @@ public class EntityPageSql{
         builder.append(" from ").append(selectSql.getTabelName().toSql());
         if(!StringUtils.isEmpty(selectSql.getTableAlias()))
             builder.append(" ").append(selectSql.getTableAlias());
-        //构造Where条件
-        if(selectSql.getWheres()!=null) {
-            builder.append(" where ").append(selectSql.getWheres().sqlOne(isPrepare));
-        }
         //插入join条件
         if(selectSql.getJoins() !=null) {
             List<EntitySimpleJoin> joins = selectSql.getJoins();
             for(EntitySimpleJoin simpleJoin:joins){
                 builder.append(" ").append(simpleJoin.toSql());
             }
-
+        }
+        //构造Where条件
+        if(selectSql.getWheres()!=null) {
+            builder.append(" where ").append(selectSql.getWheres().sqlOne(isPrepare));
         }
     }
 

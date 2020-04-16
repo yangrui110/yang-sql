@@ -57,7 +57,19 @@ public class EntityParamParse {
             }
         }
         List<EntityOrderBy> orderBy=params.getOrderBy();
-        selectSql.getOrderBys().addAll(orderBy);
+        List<EntityColumn> entityColumns = selectSql.getColumns();
+        for(EntityOrderBy orderBy1: orderBy){
+            for(EntityColumn column:entityColumns){
+                String alias = column.getAliasColumn()==null?column.getOrignColumn():column.getAliasColumn();
+                if(alias.equals(orderBy1.getColumn())){
+                    EntityOrderBy order = new EntityOrderBy();
+                    order.setDirect(orderBy1.getDirect());
+                    order.setColumn(column.getOrignColumn());
+                    order.setTableAlias(column.getTableAlias());
+                    selectSql.getOrderBys().add(order);
+                }
+            }
+        }
         return selectSql;
     }
     private EntityCondition parserParamCondition(Map condition) throws NoSuchFieldException, ClassNotFoundException {

@@ -88,8 +88,11 @@ public class StringUtils {
         StringBuffer buffer = new StringBuffer();
         while (matcher.find()){
             String group = matcher.group();
-            String tableField = getTableField(map.get(tableAlias), group);
-            matcher.appendReplacement(buffer,tableField);
+            try {
+                String tableField = getTableField(map.get(tableAlias), group);
+                matcher.appendReplacement(buffer, tableField);
+            }catch (Exception e){
+            }
         }
         matcher.appendTail(buffer);
         return buffer.toString();
