@@ -59,50 +59,50 @@ public class ObjectUtil {
                                 Short.class.getName().equals(mapName) ||
                                 Float.class.getName().equals(mapName) ||
                                 Double.class.getName().equals(mapName)) {
-                            field.set(instance, Short.parseShort(""+ map.get(name)));
+                            field.set(instance, Short.parseShort((""+ map.get(name)).trim()));
                         } else {
                             if (String.class.getName().equals(mapName))
-                                field.set(instance, Short.parseShort((String) map.get(name)));
+                                field.set(instance, Short.parseShort(((String) map.get(name)).trim()));
                         }
                     } else if (declarName.equals(Integer.class.getName())) {//转换integer
                         if (Short.class.getName().equals(mapName) ||
                                 Long.class.getName().equals(mapName) ||
                                 Float.class.getName().equals(mapName) ||
                                 Double.class.getName().equals(mapName)) {
-                            field.set(instance, Integer.parseInt(""+map.get(name)));
+                            field.set(instance, Integer.parseInt((""+map.get(name)).trim()));
                         } else {
                             if (String.class.getName().equals(mapName))
-                                field.set(instance, Integer.parseInt((String) map.get(name)));
+                                field.set(instance, Integer.parseInt(((String) map.get(name)).trim()));
                         }
                     } else if (declarName.equals(Float.class.getName())) {//转换float
                         if (Integer.class.getName().equals(mapName) ||
                                 Long.class.getName().equals(mapName) ||
                                 Short.class.getName().equals(mapName) ||
                                 Double.class.getName().equals(mapName)) {
-                            field.set(instance, Float.parseFloat(""+ map.get(name)));
+                            field.set(instance, Float.parseFloat((""+ map.get(name)).trim()));
                         } else {
                             if (String.class.getName().equals(mapName))
-                                field.set(instance, Float.parseFloat((String) map.get(name)));
+                                field.set(instance, Float.parseFloat(((String) map.get(name)).trim()));
                         }
                     } else if (declarName.equals(Double.class.getName())) {//转换double
                         if (Integer.class.getName().equals(mapName) ||
                                 Long.class.getName().equals(mapName) ||
                                 Short.class.getName().equals(mapName) ||
                                 Float.class.getName().equals(mapName)) {
-                            field.set(instance, Double.parseDouble(""+ map.get(name)));
+                            field.set(instance, Double.parseDouble((""+ map.get(name)).trim()));
                         } else {
                             if (String.class.getName().equals(mapName))
-                                field.set(instance, Double.parseDouble((String) map.get(name)));
+                                field.set(instance, Double.parseDouble(((String) map.get(name)).trim()));
                         }
                     }else if (declarName.equals(Long.class.getName())) {//转换long
                         if (Integer.class.getName().equals(mapName) ||
                                 Short.class.getName().equals(mapName) ||
                                 Float.class.getName().equals(mapName)||
                                 Double.class.getName().equals(mapName)) {
-                            field.set(instance, Long.parseLong(""+ map.get(name)));
+                            field.set(instance, Long.parseLong((""+ map.get(name)).trim()));
                         } else {
                             if (String.class.getName().equals(mapName))
-                                field.set(instance, Long.parseLong((String) map.get(name)));
+                                field.set(instance, Long.parseLong(((String) map.get(name)).trim()));
                         }
                     }
                 }

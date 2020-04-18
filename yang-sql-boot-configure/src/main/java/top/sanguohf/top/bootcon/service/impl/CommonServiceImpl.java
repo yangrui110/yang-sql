@@ -367,8 +367,9 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public <T,E> List<E> findEntityList(T params,Class<E> toJavaBean) throws Exception {
-        EntityParams entityParams = ParamEntityParseUtil.parseToParam(params);
+    public <T,E> List<E> findEntityList(Class<T> viewClass,Class<E> toJavaBean) throws Exception {
+        EntityParams entityParams = new EntityParams();
+        entityParams.setTableClassName(viewClass.getSimpleName());
         List list = findList(entityParams);
         if(list==null) {
             ArrayList<E> list1 = new ArrayList<>();

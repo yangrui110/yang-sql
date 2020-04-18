@@ -77,11 +77,11 @@ public interface CommonService {
 
     <T,E> CommonPageResp<List<E>> findEntityPageList(Class<T> viewClass,Class<E> toJavaBean, List<EntityOrderBy> orderBys, Page page) throws Exception;
 
-    <T,E> List<E> findEntityList(T params, Class<E> toJavaBean) throws Exception;
-
     /**
      * 根据condition查找数据
      */
+    <T,E> List<E> findEntityList(Class<T> viewClass,Class<E> toJavaBean) throws Exception;
+
     <T,E> List<E> findEntityList(Class<T> viewClass,Class<E> toJavaBean, JSONObject condition) throws Exception;
 
     <T,E> List<E> findEntityList(Class<T> viewClass,Class<E> toJavaBean, JSONObject condition, List<EntityOrderBy> orderBys) throws Exception;

@@ -74,12 +74,18 @@ public class EntityConditionBuilder {
     }
     public JSONObject combineAnd(){
         JSONObject result = new JSONObject();
+        if(doms.size()==0){
+            return null;
+        }
         result.put("condition",doms);
         result.put("combine","and");
         return result;
     }
     public JSONObject combineOr(){
         JSONObject result = new JSONObject();
+        if(doms.size()==0){
+            return null;
+        }
         result.put("condition",doms);
         result.put("combine","or");
         return result;
