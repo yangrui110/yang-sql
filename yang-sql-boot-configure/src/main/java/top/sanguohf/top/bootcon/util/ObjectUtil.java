@@ -4,6 +4,7 @@ package top.sanguohf.top.bootcon.util;
 import top.sanguohf.egg.reflect.ReflectEntity;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,69 +46,38 @@ public class ObjectUtil {
                 if (mapName.equals(declarName)) {
                     field.set(instance, o);
                 } else {
-                    if (Date.class.getName().equals(declarName) && ("java.sql.Date".equals(mapName)||"java.sql.Timestamp".equals(mapName))) {//转换日期
-                        Date date = (Date) map.get(name);
-                        java.sql.Date date1 = new java.sql.Date(date.getTime());
-                        field.set(instance, date1);
-                    } else if (Date.class.getName().equals(mapName) && ("java.sql.Date".equals(declarName)||"java.sql.Timestamp".equals(declarName))) {
-                        java.sql.Date date = (java.sql.Date) map.get(name);
-                        Date date1 = new Date(date.getTime());
-                        field.set(instance, date1);
-                    } else if (declarName.equals(Short.class.getName())) {//转换short
-                        if (Integer.class.getName().equals(mapName) ||
-                                Long.class.getName().equals(mapName) ||
-                                Short.class.getName().equals(mapName) ||
-                                Float.class.getName().equals(mapName) ||
-                                Double.class.getName().equals(mapName)) {
-                            field.set(instance, Short.parseShort((""+ map.get(name)).trim()));
-                        } else {
-                            if (String.class.getName().equals(mapName))
-                                field.set(instance, Short.parseShort(((String) map.get(name)).trim()));
+                    if (o instanceof Date) {//转换日期
+                        long time = ((Date) o).getTime();
+                        if(field.getType().isInstance(new java.sql.Date(time))){
+                            java.sql.Date date1 = new java.sql.Date(time);
+                            field.set(instance, date1);
+                        }else if(field.getType().isInstance(new java.sql.Timestamp(time))){
+                            java.sql.Timestamp date1 = new java.sql.Timestamp(time);
+                            field.set(instance, date1);
+                        }else if(field.getType().isInstance(new java.sql.Time(time))){
+                            java.sql.Time date1 = new java.sql.Time(time);
+                            field.set(instance, date1);
                         }
-                    } else if (declarName.equals(Integer.class.getName())) {//转换integer
-                        if (Short.class.getName().equals(mapName) ||
-                                Long.class.getName().equals(mapName) ||
-                                Float.class.getName().equals(mapName) ||
-                                Double.class.getName().equals(mapName)) {
-                            field.set(instance, Integer.parseInt((""+map.get(name)).trim()));
-                        } else {
-                            if (String.class.getName().equals(mapName))
-                                field.set(instance, Integer.parseInt(((String) map.get(name)).trim()));
-                        }
-                    } else if (declarName.equals(Float.class.getName())) {//转换float
-                        if (Integer.class.getName().equals(mapName) ||
-                                Long.class.getName().equals(mapName) ||
-                                Short.class.getName().equals(mapName) ||
-                                Double.class.getName().equals(mapName)) {
-                            field.set(instance, Float.parseFloat((""+ map.get(name)).trim()));
-                        } else {
-                            if (String.class.getName().equals(mapName))
-                                field.set(instance, Float.parseFloat(((String) map.get(name)).trim()));
-                        }
-                    } else if (declarName.equals(Double.class.getName())) {//转换double
-                        if (Integer.class.getName().equals(mapName) ||
-                                Long.class.getName().equals(mapName) ||
-                                Short.class.getName().equals(mapName) ||
-                                Float.class.getName().equals(mapName)) {
-                            field.set(instance, Double.parseDouble((""+ map.get(name)).trim()));
-                        } else {
-                            if (String.class.getName().equals(mapName))
-                                field.set(instance, Double.parseDouble(((String) map.get(name)).trim()));
-                        }
-                    }else if (declarName.equals(Long.class.getName())) {//转换long
-                        if (Integer.class.getName().equals(mapName) ||
-                                Short.class.getName().equals(mapName) ||
-                                Float.class.getName().equals(mapName)||
-                                Double.class.getName().equals(mapName)) {
-                            field.set(instance, Long.parseLong((""+ map.get(name)).trim()));
-                        } else {
-                            if (String.class.getName().equals(mapName))
-                                field.set(instance, Long.parseLong(((String) map.get(name)).trim()));
+                    } else if(o instanceof Number){
+                        String s = ""+o;
+                        if(field.getType().isInstance(new Short((short)0))){
+                            field.set(instance,Short.parseShort(s));
+                        }else if(field.getType().isInstance(new Integer(0))){
+                            field.set(instance,Integer.parseInt(s));
+                        }else if(field.getType().isInstance(new Float(0))){
+                            field.set(instance,Float.parseFloat(s));
+                        }else if(field.getType().isInstance(new Double(0))){
+                            field.set(instance,Double.parseDouble(s));
+                        }else if(field.getType().isInstance(new Long(0))){
+                            field.set(instance,Long.parseLong(s));
+                        }else if(field.getType().isInstance(new BigDecimal(0))){
+                            field.set(instance,new BigDecimal(s));
+                        }else if(field.getType().isInstance(new String())){
+                            field.set(instance,s);
                         }
                     }
                 }
             }
         }
     }
-
 }
