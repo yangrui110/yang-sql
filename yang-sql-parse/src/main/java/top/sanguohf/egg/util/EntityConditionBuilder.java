@@ -1,7 +1,9 @@
 package top.sanguohf.egg.util;
 
 import com.alibaba.fastjson.JSONObject;
+import top.sanguohf.egg.reflect.ReflectEntity;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,11 +92,36 @@ public class EntityConditionBuilder {
         result.put("combine","or");
         return result;
     }
-    public JSONObject combine(JSONObject left,JSONObject right,String relation){
+    public static JSONObject combine(JSONObject left,JSONObject right,String relation){
         JSONObject result = new JSONObject();
         result.put("left",left);
         result.put("right",right);
         result.put("relation",relation);
         return result;
+    }
+    public static JSONObject combine(JSONObject left,JSONObject right){
+        JSONObject result = new JSONObject();
+        result.put("left",left);
+        result.put("right",right);
+        result.put("relation","and");
+        return result;
+    }
+
+    /**
+     * 转换java为Map查询条件
+     * */
+    public static <T> JSONObject buildClass(T data) throws IllegalAccessException {
+        JSONObject map = new JSONObject();
+        Class<?> aClass = data.getClass();
+        List<Field> fields = ReflectEntity.getFields(aClass);
+        for(Field field:fields){
+            field.setAccessible(true);
+            Object o = field.get(data);
+            if(o!=null)
+                map.put(field.getName(),o);
+        }
+        if(map.keySet().size()>0)
+            return map;
+        return null;
     }
 }

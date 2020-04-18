@@ -278,6 +278,44 @@ public class CommonServiceImpl implements CommonService {
         }
     }
 
+    /**
+     * @param data 可以是实体对象，也可以是View对象
+     * @param toJavaBean 查询结果转换成为的java对象
+     * @param page 分页参数
+     * */
+    @Override
+    public <T, E> CommonPageResp<List<E>> findByEntityPageList(T data, Class<E> toJavaBean, Page page) throws Exception {
+        EntityParams entityParams = ParamEntityParseUtil.parseToParam(data);
+        CommonPageResp pageList = findPageList(entityParams, page);
+        List listData = (List) pageList.getData();
+        if(listData==null) {
+            CommonPageResp<List<E>> resp = new CommonPageResp<>();
+            resp.setData(new ArrayList<>());
+            resp.setCount(0);
+            return resp;
+        }
+        List<E> parseList = ObjectUtil.parseList(listData, toJavaBean);
+        pageList.setData(parseList);
+        return pageList;
+    }
+
+    @Override
+    public <T, E> CommonPageResp<List<E>> findByEntityPageList(T data, Class<E> toJavaBean, List<EntityOrderBy> orderBys, Page page) throws Exception {
+        EntityParams entityParams = ParamEntityParseUtil.parseToParam(data);
+        entityParams.setOrderBy(orderBys);
+        CommonPageResp pageList = findPageList(entityParams, page);
+        List listData = (List) pageList.getData();
+        if(listData==null) {
+            CommonPageResp<List<E>> resp = new CommonPageResp<>();
+            resp.setData(new ArrayList<>());
+            resp.setCount(0);
+            return resp;
+        }
+        List<E> parseList = ObjectUtil.parseList(listData, toJavaBean);
+        pageList.setData(parseList);
+        return pageList;
+    }
+
     @Override
     public <T, E> CommonPageResp<List<E>> findEntityPageList(Class<T> viewClass, Class<E> toJavaBean, Page page) throws Exception {
         EntityParams entityParams = new EntityParams();
@@ -364,6 +402,31 @@ public class CommonServiceImpl implements CommonService {
         List<E> parseList = ObjectUtil.parseList(listData, toJavaBean);
         pageList.setData(parseList);
         return pageList;
+    }
+
+    @Override
+    public <T, E> List<E> findListByEntity(T data, Class<E> toJavaBean) throws Exception {
+        EntityParams entityParams = ParamEntityParseUtil.parseToParam(data);
+        List list = findList(entityParams);
+        if(list==null) {
+            ArrayList<E> list1 = new ArrayList<>();
+            return list1;
+        }
+        List<E> parseList = ObjectUtil.parseList(list, toJavaBean);
+        return parseList;
+    }
+
+    @Override
+    public <T, E> List<E> findListByEntity(T data, Class<E> toJavaBean, List<EntityOrderBy> orderBys) throws Exception {
+        EntityParams entityParams = ParamEntityParseUtil.parseToParam(data);
+        entityParams.setOrderBy(orderBys);
+        List list = findList(entityParams);
+        if(list==null) {
+            ArrayList<E> list1 = new ArrayList<>();
+            return list1;
+        }
+        List<E> parseList = ObjectUtil.parseList(list, toJavaBean);
+        return parseList;
     }
 
     @Override

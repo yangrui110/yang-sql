@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import top.sanguohf.egg.param.EntityParams;
 import top.sanguohf.egg.reflect.ReflectEntity;
 import top.sanguohf.egg.reflect.SubTeacher;
+import top.sanguohf.egg.util.EntityConditionBuilder;
 import top.sanguohf.egg.util.StringUtils;
 
 import java.lang.reflect.Field;
@@ -14,14 +15,7 @@ public class ParamEntityParseUtil {
     public static <T> EntityParams parseToParam(T data) throws IllegalAccessException {
         EntityParams entityParams = new EntityParams();
         String name = data.getClass().getSimpleName();
-        List<Field> fields = ReflectEntity.getFields(data.getClass());
-        JSONObject map = new JSONObject();
-        for (Field field:fields){
-            field.setAccessible(true);
-            Object o = field.get(data);
-            if(o!=null)
-                map.put(field.getName(),o);
-        }
+        JSONObject map = EntityConditionBuilder.buildClass(data);
         entityParams.setTableClassName(name);
         entityParams.setCondition(map);
         return entityParams;

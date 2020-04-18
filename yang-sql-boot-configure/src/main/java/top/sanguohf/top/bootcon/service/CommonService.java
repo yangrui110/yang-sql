@@ -62,7 +62,10 @@ public interface CommonService {
      */
     void batchSave(List<EntityParams> params) throws Exception;
 
-    //<T,E> CommonPageResp<List<E>> findEntityPageList(T data, Class<E> toJavaBean, Page page) throws Exception;
+    <T,E> CommonPageResp<List<E>> findByEntityPageList(T data, Class<E> toJavaBean, Page page) throws Exception;
+
+    <T,E> CommonPageResp<List<E>> findByEntityPageList(T data, Class<E> toJavaBean,List<EntityOrderBy> orderBys, Page page) throws Exception;
+
     <T,E> CommonPageResp<List<E>> findEntityPageList(Class<T> viewClass,Class<E> toJavaBean,  Page page) throws Exception;
 
     /**
@@ -77,6 +80,9 @@ public interface CommonService {
 
     <T,E> CommonPageResp<List<E>> findEntityPageList(Class<T> viewClass,Class<E> toJavaBean, List<EntityOrderBy> orderBys, Page page) throws Exception;
 
+    <T,E> List<E> findListByEntity(T data,Class<E> toJavaBean) throws Exception;
+
+    <T,E> List<E> findListByEntity(T data,Class<E> toJavaBean,  List<EntityOrderBy> orderBys) throws Exception;
     /**
      * 根据condition查找数据
      */
