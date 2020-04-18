@@ -81,7 +81,7 @@ public class StringUtils {
      * 替换condition中的列名
      * */
     public static String patternReplace(Map<String,Class> map,String tableAlias,String condition) throws NoSuchFieldException, ClassNotFoundException {
-        String patter = "(?<=%s\\.).*?(?==| |>|<|$)";
+        String patter = "(?<=%s\\.)\\w+(?==| |>|<|$)";
         String format = String.format(patter, tableAlias);
         Pattern compile = Pattern.compile(format);
         Matcher matcher = compile.matcher(condition);
