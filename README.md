@@ -10,7 +10,7 @@ csdn教程地址：[教程一](https://blog.csdn.net/yr_sky/article/details/1043
 <dependency>
     <groupId>top.sanguohf.egg</groupId>
     <artifactId>yang-sql-starter</artifactId>
-    <version>1.0.18-release</version>
+    <version>1.0.19-release</version>
 </dependency>
 ```
 ### 2. 使用
