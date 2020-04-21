@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 public class EntityListCondition implements EntityCondition {
 
-    private List<EntityConditionDom> condition;
+    private List<? extends EntityCondition> condition;
     private String combine;
 
     public String toSql() {
@@ -36,7 +36,7 @@ public class EntityListCondition implements EntityCondition {
 
     @Override
     public void addValue(List list) {
-        for(EntityConditionDom dom:condition){
+        for(EntityCondition dom:condition){
             dom.addValue(list);
         }
     }

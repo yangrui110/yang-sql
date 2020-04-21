@@ -75,7 +75,7 @@ public class EntityParamParse {
     private EntityCondition parserParamCondition(Map condition) throws NoSuchFieldException, ClassNotFoundException {
         Object os = condition.get("condition");
         if(os==null){
-            EntityConditionDom dom = parseOneCondition(condition);
+            EntityCondition dom = parseOneCondition(condition);
             return dom;
         }else {
             List ls = (List) os;
@@ -97,16 +97,29 @@ public class EntityParamParse {
         return condition1;
     }
     //解析一个基础DOM元素
-    private EntityConditionDom parseOneCondition(Map map) throws NoSuchFieldException, ClassNotFoundException {
-        EntityConditionDom dom = new EntityConditionDom();
-        Object left=map.get("left");
-        dom.setLeft(parseToCondition(left,false));
+    private EntityCondition parseOneCondition(Map map) throws NoSuchFieldException, ClassNotFoundException {
         Object relation=map.get("relation");
-        dom.setRelation((String) relation);
-        Object right=map.get("right");
-        EntityCondition condition=parseToCondition(right,true);
-        dom.setRight(condition);
-        return dom;
+        if(relation!=null&&"is".equalsIgnoreCase(((String) relation).trim())){
+            EntityConditionPre pre = new EntityConditionPre();
+            pre.setRelation((String) relation);
+            Object left = map.get("left");
+            EntityColumn fieldAlias = getFieldAlias((String) left);
+            if(fieldAlias!=null){
+                pre.setTableAlias(fieldAlias.getTableAlias());
+                pre.setColumn(fieldAlias.getOrignColumn());
+            }
+            pre.setValue(null);
+            return pre;
+        }else {
+            EntityConditionDom dom = new EntityConditionDom();
+            Object left = map.get("left");
+            dom.setLeft(parseToCondition(left, false));
+            dom.setRelation((String) relation);
+            Object right = map.get("right");
+            EntityCondition condition = parseToCondition(right, true);
+            dom.setRight(condition);
+            return dom;
+        }
     }
     //解析left或者right元素
     private EntityCondition parseToCondition(Object os,boolean isRight) throws ClassNotFoundException, NoSuchFieldException {
@@ -114,15 +127,15 @@ public class EntityParamParse {
         if(os !=null && os instanceof Map) {
             condition = parserParamCondition((Map) os);
             return condition;
-        }else if(os !=null){
+        }else if(!isRight&&os==null){
+            throw new RuntimeException("列名不能为空,列："+os);
+        } else{
             if(!isRight) {
                 condition = new EntityConditionColumn();
-                for(EntityColumn conditionColumn:selectSql.getColumns()){
-                    String alias = StringUtils.isEmpty(conditionColumn.getAliasColumn())?conditionColumn.getAliasColumn():conditionColumn.getFieldName();
-                    if(alias.equalsIgnoreCase((String) os)){
-                        ((EntityConditionColumn) condition).setColumn(conditionColumn.getOrignColumn());
-                        ((EntityConditionColumn) condition).setTableAlias(conditionColumn.getTableAlias());
-                    }
+                EntityColumn fieldAlias = getFieldAlias((String) os);
+                if(fieldAlias!=null){
+                    ((EntityConditionColumn) condition).setColumn(fieldAlias.getOrignColumn());
+                    ((EntityConditionColumn) condition).setTableAlias(fieldAlias.getTableAlias());
                 }
             } else {
                 condition=new EntityConditionValue();
@@ -131,7 +144,6 @@ public class EntityParamParse {
 
             return condition;
         }
-        return null;
     }
 
     public EntityInsertSql parseToEntityInertSql() throws ClassNotFoundException, NoSuchFieldException {
@@ -176,5 +188,18 @@ public class EntityParamParse {
         JSONObject condition= params.getCondition();
         deleteSql.setWheres(ReflectEntity.reflectPrimaryKeys(classEntity,condition));
         return deleteSql;
+    }
+
+    /**
+     * 获取到列的别名
+     * */
+    private EntityColumn getFieldAlias(String column){
+        for(EntityColumn conditionColumn:selectSql.getColumns()){
+            String alias = StringUtils.isEmpty(conditionColumn.getAliasColumn())?conditionColumn.getAliasColumn():conditionColumn.getFieldName();
+            if(alias.equalsIgnoreCase(column)){
+                return conditionColumn;
+            }
+        }
+        return null;
     }
 }

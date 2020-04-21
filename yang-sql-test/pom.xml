@@ -34,7 +34,7 @@
         <dependency>
             <groupId>top.sanguohf.egg</groupId>
             <artifactId>yang-sql-starter</artifactId>
-            <version>1.0.8-release</version>
+            <version>1.0.19-release</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

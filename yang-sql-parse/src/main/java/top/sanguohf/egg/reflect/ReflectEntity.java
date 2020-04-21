@@ -159,7 +159,7 @@ public class ReflectEntity {
     public static EntityCondition collectDefaultCondition(Class entity) throws NoSuchFieldException, ClassNotFoundException {
         List<Field> fields = getFields(entity);
         EntityListCondition condition = new EntityListCondition();
-        List<EntityConditionDom> conditions = new LinkedList<>();
+        List<EntityConditionPre> conditions = new LinkedList<>();
         for(Field field: fields){
             if(field.isAnnotationPresent(Condition.class)){
                 Condition annotation = field.getAnnotation(Condition.class);
@@ -180,34 +180,31 @@ public class ReflectEntity {
     }
 
     //收集到一个condition
-    private static EntityConditionDom getOneCondition(Condition annotation,Class entity,Field field) throws NoSuchFieldException, ClassNotFoundException {
-        EntityConditionDom conditionDom = new EntityConditionDom();
-        EntityConditionColumn column = new EntityConditionColumn();
+    private static EntityConditionPre getOneCondition(Condition annotation,Class entity,Field field) throws NoSuchFieldException, ClassNotFoundException {
+        EntityConditionPre pre = new EntityConditionPre();
+
         String tableField = "";
         boolean present = entity.isAnnotationPresent(ViewTable.class);
         if(present){
             Class<?> forName = Class.forName(field.getGenericType().getTypeName());
             if(field.isAnnotationPresent(MainTable.class)){
                 MainTable mainTable = field.getAnnotation(MainTable.class);
-                column.setTableAlias(mainTable.tableAlias());
+                pre.setTableAlias(mainTable.tableAlias());
             }else if(field.isAnnotationPresent(ReferTable.class)) {
                 ReferTable referTable = field.getAnnotation(ReferTable.class);
-                column.setTableAlias(referTable.tableAlias());
+                pre.setTableAlias(referTable.tableAlias());
             }
             tableField = getTableField(forName, annotation.column());
         }else {
             tableField = getTableField(entity, field.getName());
         }
-        column.setColumn(tableField);
-        conditionDom.setLeft(column);
+        pre.setColumn(tableField);
         //
         if(StringUtils.isEmpty(annotation.relation()))
-            conditionDom.setRelation("=");
-        else conditionDom.setRelation(annotation.relation());
-        EntityConditionValue columnRight = new EntityConditionValue();
-        columnRight.setColumn(parseValue(annotation.value(),annotation.type()));
-        conditionDom.setRight(columnRight);
-        return conditionDom;
+            pre.setRelation("=");
+        else pre.setRelation(annotation.relation());
+        pre.setValue(parseValue(annotation.value(),annotation.type()));
+        return pre;
     }
     /**
      * 收集到待排序的字段

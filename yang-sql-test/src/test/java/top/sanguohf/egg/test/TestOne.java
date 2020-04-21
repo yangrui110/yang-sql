@@ -7,7 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import top.sanguohf.egg.param.EntityParams;
+import top.sanguohf.egg.test.entity.User;
+import top.sanguohf.egg.test.entity.UserClassesView;
 import top.sanguohf.egg.test.entity.UserOne;
+import top.sanguohf.egg.test.entity.XfRMaterial;
+import top.sanguohf.egg.util.EntityConditionBuilder;
 import top.sanguohf.top.bootcon.page.Page;
 import top.sanguohf.top.bootcon.resp.CommonPageResp;
 import top.sanguohf.top.bootcon.service.CommonService;
@@ -48,7 +52,7 @@ public class TestOne {
     }
 
     @Test
-    public void test3() throws NoSuchFieldException, IOException, ClassNotFoundException, InvocationTargetException, IllegalAccessException {
+    public void test3() throws Exception {
         EntityParams params = new EntityParams();
         params.setTableClassName("UserClassesView");
         //设置查询条件
@@ -59,7 +63,12 @@ public class TestOne {
         params.setCondition(con1);
         Page page = new Page();
         page.setPage(1);page.setSize(10);*/
-        List list = commonService.findList(params);
+        /*EntityConditionBuilder teacherId = EntityConditionBuilder.getInstance().like("teacherName","ps").isNull("teacherId");
+        CommonPageResp<List<User>> entityPageList = commonService.findEntityPageList(UserClassesView.class, User.class, teacherId.combineAnd(), new Page(1, 10));
+        System.out.println(entityPageList);*/
+        EntityConditionBuilder aNull = EntityConditionBuilder.getInstance().isNull("dnModifytime").eq("rMeSpecName",2222);
+        CommonPageResp<List<XfRMaterial>> pageList = commonService.findEntityPageList(XfRMaterial.class, XfRMaterial.class, aNull.combineAnd(), new Page(1, 10));
+        System.out.println(pageList);
     }
     //无条件查询
     @Test
