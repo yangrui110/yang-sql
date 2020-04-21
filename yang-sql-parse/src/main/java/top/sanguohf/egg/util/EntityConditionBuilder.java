@@ -25,7 +25,46 @@ public class EntityConditionBuilder {
         doms.add(object);
         return this;
     }
-
+    public EntityConditionBuilder likeLeft(String column, Object value){
+        JSONObject object = new JSONObject();
+        object.put("left",column);
+        object.put("right","%"+value);
+        object.put("relation","like");
+        doms.add(object);
+        return this;
+    }
+    public EntityConditionBuilder likeRight(String column, Object value){
+        JSONObject object = new JSONObject();
+        object.put("left",column);
+        object.put("right",value+"%");
+        object.put("relation","like");
+        doms.add(object);
+        return this;
+    }
+    public EntityConditionBuilder notLike(String column, Object value){
+        JSONObject object = new JSONObject();
+        object.put("left",column);
+        object.put("right","%"+value+"%");
+        object.put("relation","not like");
+        doms.add(object);
+        return this;
+    }
+    public EntityConditionBuilder isNull(String column){
+        JSONObject object = new JSONObject();
+        object.put("left",column);
+        object.put("right",null);
+        object.put("relation","is");
+        doms.add(object);
+        return this;
+    }
+    public EntityConditionBuilder isNotNull(String column){
+        JSONObject object = new JSONObject();
+        object.put("left",column);
+        object.put("right",null);
+        object.put("relation","is not");
+        doms.add(object);
+        return this;
+    }
     public EntityConditionBuilder eq(String column,Object value){
         JSONObject object = new JSONObject();
         object.put("left",column);
@@ -66,11 +105,27 @@ public class EntityConditionBuilder {
         doms.add(object);
         return this;
     }
+    /**
+     * @param column the attr of entity
+     * @param value the value is instance of Object[] or List
+     * */
     public EntityConditionBuilder in(String column,Object value){
         JSONObject object = new JSONObject();
         object.put("left",column);
         object.put("right",value);
         object.put("relation","in");
+        doms.add(object);
+        return this;
+    }
+    /**
+     * @param column the attr of entity
+     * @param value the value is instance of Object[] or List
+     * */
+    public EntityConditionBuilder notIn(String column,Object value){
+        JSONObject object = new JSONObject();
+        object.put("left",column);
+        object.put("right",value);
+        object.put("relation","not in");
         doms.add(object);
         return this;
     }
