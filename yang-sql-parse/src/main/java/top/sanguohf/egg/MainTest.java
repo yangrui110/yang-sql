@@ -132,7 +132,7 @@ public class MainTest {
     public static void main(String[] args) throws ClassNotFoundException, NoSuchFieldException {
         EntityParams entityParams = new EntityParams();
         Class<?> aClass = Class.forName("top.sanguohf.egg.reflect.ThirdTeacher");
-        entityParams.setTableClassName("top.sanguohf.egg.reflect.ThirdTeacher");
+        entityParams.setTableClassName("top.sanguohf.egg.reflect.UserClassesView");
         EntitySelectSql selectSql = new EntityParamParse(entityParams).parseToEntitySelectSql();
         System.out.println(selectSql.toSql());
     }

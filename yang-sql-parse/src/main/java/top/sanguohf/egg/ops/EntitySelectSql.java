@@ -24,6 +24,8 @@ public class EntitySelectSql extends AbstractEntityJoinTable {
     private List<EntitySimpleJoin> joins;
     private List<EntityOrderBy> orderBys;
 
+    //分组、分组条件、
+
     public String toSql() {
         return sqlOne(false);
     }

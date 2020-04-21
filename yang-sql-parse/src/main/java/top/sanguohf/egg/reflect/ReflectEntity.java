@@ -4,7 +4,10 @@ import top.sanguohf.egg.annotation.*;
 import top.sanguohf.egg.annotation.Condition;
 import top.sanguohf.egg.base.*;
 import top.sanguohf.egg.constant.ValueType;
+import top.sanguohf.egg.ops.EntityJoinTable;
 import top.sanguohf.egg.ops.EntitySelectSql;
+import top.sanguohf.egg.ops.EntitySimpleJoinTable;
+import top.sanguohf.egg.util.EntityParseUtil;
 import top.sanguohf.egg.util.StringUtils;
 
 import java.lang.reflect.Field;
@@ -293,7 +296,14 @@ public class ReflectEntity {
                 String[] excludeColumns = annotation.excludeColumns();
                 String alias = annotation.tableAlias();
                 Class<?> forName = Class.forName(field.getGenericType().getTypeName());
-                List<EntityColumn> entityColumns = collectColumns(reflectSelectColumns(forName), includeColumns, excludeColumns, alias);
+                List<EntityColumn> columns = null;
+                if(forName.isAnnotationPresent(ViewTable.class)){
+                    columns = getViewTableColumns(forName);
+                    columns.forEach(item->item.setOrignColumn(item.getAliasColumn()));
+                }else {
+                    columns = reflectSelectColumns(forName);
+                }
+                List<EntityColumn> entityColumns = collectColumns(columns, includeColumns, excludeColumns, alias);
                 totalResult.addAll(entityColumns);
             }else {
                 Class<?> forName = Class.forName(field.getGenericType().getTypeName());
@@ -345,7 +355,18 @@ public class ReflectEntity {
                     String tableName = reflectTableName(map.get(tableAlias));
                     EntitySimpleJoin simpleJoin = new EntitySimpleJoin();
                     simpleJoin.setRelation(annotation.relation() == null ? "left join" : annotation.relation());
-                    simpleJoin.setTableName(tableName);
+                    Class<?> forName = Class.forName(field.getGenericType().getTypeName());
+                    if(forName.isAnnotationPresent(ViewTable.class)) {
+                        EntityJoinTable entityJoinTable = EntityParseUtil.parseViewEntityTable(forName);
+                        simpleJoin.setTableName(entityJoinTable);
+                    }else {
+                        EntitySimpleJoinTable joinTable = new EntitySimpleJoinTable();
+                        if (forName.isAnnotationPresent(TableName.class))
+                            joinTable.setTableName(forName.getAnnotation(TableName.class).value());
+                        else joinTable.setTableName(StringUtils.camel2Underline(forName.getSimpleName()));
+                        //设置表名
+                        simpleJoin.setTableName(joinTable);
+                    }
                     simpleJoin.setTableAlias(tableAlias);
                     String condition = annotation.condition();
                     for (String alias : list) {

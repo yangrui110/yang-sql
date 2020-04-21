@@ -3,6 +3,7 @@ package top.sanguohf.egg.util;
 import com.alibaba.fastjson.JSONObject;
 import top.sanguohf.egg.SqlParse;
 import top.sanguohf.egg.annotation.MainTable;
+import top.sanguohf.egg.annotation.ReferTable;
 import top.sanguohf.egg.annotation.TableName;
 import top.sanguohf.egg.annotation.ViewTable;
 import top.sanguohf.egg.base.*;
