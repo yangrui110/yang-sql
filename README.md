@@ -26,7 +26,7 @@
 
 # 2、初次使用
 
-1、在SpringBoot项目中引入Maven包后，你就可以进行测试了。在SpringBoot的主运行类上加上`@ScanEntity`注解，配置扫描的实体类路径。加上`@EnableTransactionManagement`注解，可以保证批量操作的事务一致性。如下配置：
+1、在SpringBoot项目中引入Maven包后，你就可以进行测试了。在SpringBoot的主运行类上加上`@ScanEntity`注解,如下配置：
 
 ```java
 @EnableTransactionManagement
