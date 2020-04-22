@@ -4,4 +4,4 @@ spring:
     druid:
       url: jdbc:mysql://212.64.50.170:3306/springsys?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC&zeroDateTimeBehavior=convertToNull&&allowPublicKeyRetrieval=true
       username: root
-      password: 
+      password:
