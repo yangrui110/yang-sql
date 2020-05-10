@@ -5,10 +5,7 @@ import top.sanguohf.egg.reflect.ReflectEntity;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ObjectUtil {
     public static <T> T create(Class<T> clazz) {
@@ -31,7 +28,12 @@ public class ObjectUtil {
     }
     public static void copyMapToBean(Map map,Object instance) throws IllegalAccessException, InstantiationException {
         if(instance instanceof Map){
-            instance = map;
+            Set set = map.keySet();
+            Iterator iterator = set.iterator();
+            while (iterator.hasNext()){
+                Object next = iterator.next();
+                ((Map) instance).put(next,map.get(next));
+            }
             return;
         }
         Class<?> aClass = instance.getClass();

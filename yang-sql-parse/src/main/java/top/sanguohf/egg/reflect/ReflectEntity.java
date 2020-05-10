@@ -398,9 +398,9 @@ public class ReflectEntity {
                 Field[] declaredFields = forName.getDeclaredFields();
                 superclass = forName.getGenericSuperclass();
                 for(Field f:declaredFields) {
-                    //排除掉static，final
+                    //排除掉static，final,trasient
                     int modifiers = f.getModifiers();
-                    if (!Modifier.isStatic(modifiers)&&!Modifier.isFinal(modifiers))
+                    if (!Modifier.isStatic(modifiers)&&!Modifier.isFinal(modifiers)&&!Modifier.isTransient(modifiers))
                         objects.add(f);
                 }
             }

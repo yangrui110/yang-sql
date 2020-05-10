@@ -16,7 +16,7 @@ public class ClassInfoUtil {
             String packageSearchPath = "classpath*:" + resourcePath + '/' + "**/*.class";
             Resource[] resources = new PathMatchingResourcePatternResolver().getResources(packageSearchPath);
             for (Resource resource : resources) {
-                if(resource.getFile().getName().equals(name+".class")){
+                if(resource.getURL().toString().endsWith(name+".class")){
                     String all = resource.getURL().toString().replaceAll("/", ".");
                     int start = all.indexOf(basePackage);
                     int end = all.lastIndexOf(".class");
